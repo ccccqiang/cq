@@ -89,10 +89,13 @@
     <div class="container">
         <div class="buttons">
             <button onclick="action1()">闪避</button>
-            <button onclick="action2()">广告攻击15</button>
-            <button onclick="action3()">技能伤害100</button>
-            <button onclick="action4()">宠物伤害10</button>
-            <button onclick="action5()">BOSS伤害8</button>
+            <button onclick="action2()">广告攻击</button>
+            <button onclick="action3()">技能伤害</button>
+            <button onclick="action4()">宠物伤害</button>
+            <button onclick="action5()">BOSS伤害</button>
+            <button onclick="action6()">幸运一击</button>
+            <button onclick="action7()">刺刺</button>
+            <button onclick="action8()">无限击飞</button>
         </div>
     </div>
     <div id="toast" class="toast">成功</div>
@@ -121,7 +124,7 @@
             h5gg.searchNearby('0.08', 'F64', '0x100');
             h5gg.editAll('80.9991', 'F64');
             h5gg.clearResults();
-            showToast('广告攻击修改成功');
+            showToast('广告攻击修改成功80');
         }
 
         function action3() {
@@ -129,7 +132,7 @@
             h5gg.searchNumber('2.8023', 'F64', '0x0', '0x200000000');
             h5gg.editAll("100.9991", 'F64');
             h5gg.clearResults();
-            showToast('技能伤害修改成功');
+            showToast('技能伤害修改成功100');
         }
 
         function action4() {
@@ -137,7 +140,7 @@
             h5gg.searchNumber('0.1047', 'F64', '0x0', '0x200000000');
             h5gg.editAll("10.9991", 'F64');
             h5gg.clearResults();
-            showToast('宠物伤害修改成功');
+            showToast('宠物伤害修改成功10');
         }
 
         function action5() {
@@ -145,7 +148,15 @@
             h5gg.searchNumber('0.1113', 'F64', '0x0', '0x200000000');
             h5gg.editAll("8.9991", 'F64');
             h5gg.clearResults();
-            showToast('对BOSS伤害修改成功');
+            showToast('对BOSS伤害修改成功8');
+        }
+
+        function action6() {
+            h5gg.clearResults();
+            h5gg.searchNumber('0.0039', 'F64', '0x0', '0x200000000');
+            h5gg.editAll("0.4", 'F64');
+            h5gg.clearResults();
+            showToast('幸运一击修改成功04');
         }
     </script>
 </body>

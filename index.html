@@ -89,8 +89,9 @@
     <div class="container">
         <div class="buttons">
             <button onclick="action1()">闪避</button>
-            <button onclick="action2()">广告攻击</button>
-            <button onclick="action3()">技能伤害</button>
+            <button onclick="action2()">广告攻击15</button>
+            <button onclick="action3()">技能伤害100</button>
+            <button onclick="action3()">宠物伤害10</button>
         </div>
     </div>
     <div id="toast" class="toast">成功</div>
@@ -115,7 +116,7 @@
 
         function action2() {
             h5gg.clearResults();
-            h5gg.searchNumber('0.3', 'F64', '0x00000000', '0x200000000');
+            h5gg.searchNumber('0.3', 'F64', '0x0', '0x200000000');
             h5gg.searchNearby('0.08', 'F64', '0x100');
             h5gg.editAll('15.9991', 'F64');
             h5gg.clearResults();
@@ -127,7 +128,15 @@
             h5gg.searchNumber('2.8023', 'F64', '0x0', '0x160000000');
             h5gg.editAll("100.9991", 'F64');
             h5gg.clearResults();
-            showToast('宠物伤害修改成功');
+            showToast('技能伤害修改成功');
+        }
+
+        function action4() {
+            h5gg.clearResults();
+            h5gg.searchNumber('0.5838', 'F64', '0x0', '0x160000000');
+            h5gg.editAll("10.9991", 'F64');
+            h5gg.clearResults();
+            showToast('技能伤害修改成功');
         }
     </script>
 </body>

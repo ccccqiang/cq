@@ -14,34 +14,31 @@
         h1 {
             text-align: center;
             color: #333;
-            font-size: 1.2em;
-            margin-bottom: 15px;
+            font-size: 1em;
+            margin-bottom: 10px;
         }
         .container {
-            max-width: 350px;
+            max-width: 300px;
             margin: 0 auto;
             background: #fff;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .action {
-            margin-bottom: 10px;
-        }
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         .buttons button {
-            padding: 12px;
+            padding: 10px;
             background-color: #007BFF;
             color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            font-size: 1em;
+            font-size: 0.9em;
         }
         .buttons button:hover {
             background-color: #0056b3;
@@ -51,18 +48,18 @@
         }
         .toast {
             visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
+            min-width: 200px;
+            margin-left: -100px;
             background-color: #333;
             color: #fff;
             text-align: center;
             border-radius: 2px;
-            padding: 16px;
+            padding: 12px;
             position: fixed;
             z-index: 1;
             left: 50%;
-            bottom: 30px;
-            font-size: 17px;
+            bottom: 20px;
+            font-size: 14px;
         }
         .toast.show {
             visibility: visible;
@@ -71,18 +68,18 @@
         }
         @-webkit-keyframes fadein {
             from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
+            to {bottom: 20px; opacity: 1;}
         }
         @keyframes fadein {
             from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
+            to {bottom: 20px; opacity: 1;}
         }
         @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
+            from {bottom: 20px; opacity: 1;} 
             to {bottom: 0; opacity: 0;}
         }
         @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
+            from {bottom: 20px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
     </style>
@@ -90,28 +87,12 @@
 <body>
     <h1>H5GG Memory Editor</h1>
     <div class="container">
-        <!-- Action 1 -->
-        <div class="action">
-            <div class="buttons">
-                <button onclick="action1()">闪避</button>
-            </div>
-        </div>
-
-        <!-- Action 2 -->
-        <div class="action">
-            <div class="buttons">
-                <button onclick="action2()">广告攻击</button>
-            </div>
-        </div>
-
-        <!-- Action 3 -->
-        <div class="action">
-            <div class="buttons">
-                <button onclick="action3()">技能伤害</button>
-            </div>
+        <div class="buttons">
+            <button onclick="action1()">闪避</button>
+            <button onclick="action2()">广告攻击</button>
+            <button onclick="action3()">技能伤害</button>
         </div>
     </div>
-
     <div id="toast" class="toast">成功</div>
 
     <script>

@@ -87,6 +87,7 @@
         <div class="buttons">
             <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
             <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
+<!--             <button onclick="modify('广告15', '0.4', 'adsAttack15Value', '15.9991', 'F64', '0.1', '0x100')">广告攻击15</button> -->
             <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
             <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
             <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
@@ -114,20 +115,20 @@
             localStorage.setItem(key, value);
         }
 
-        function modify(actionName, searchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
+        function modify(actionName, initialSearchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
             let storedValue = getStoredValue(storageKey);
             let editValue = prompt(`请输入${actionName}要修改的值:`, storedValue || defaultEditValue);
             if (editValue !== null && editValue !== "") {
                 storeValue(storageKey, editValue);
                 h5gg.clearResults();
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
+                h5gg.searchNumber(storedValue || initialSearchValue, dataType, '0x0', '0x200000000');
                 if (nearbyValue && nearbyOffset) {
                     h5gg.searchNearby(nearbyValue, dataType, nearbyOffset);
                 }
                 if (additionalNearbyValue && additionalNearbyOffset) {
                     h5gg.searchNearby(additionalNearbyValue, dataType, additionalNearbyOffset);
                 }
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000'); // 再次搜索
+                h5gg.searchNumber(storedValue || initialSearchValue, dataType, '0x0', '0x200000000'); // 再次搜索上次的值
                 h5gg.editAll(editValue, dataType);
                 h5gg.clearResults();
                 showToast(`${actionName} 修改成功`);

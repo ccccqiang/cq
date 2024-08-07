@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            background-color: transparent;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -22,29 +22,49 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 300px;
+            position: fixed;
+            top: 10%;
+            right: 10px;
+            z-index: 1000;
         }
         h1 {
             margin-bottom: 20px;
-            font-size: 1.8em;
+            font-size: 1.4em;
         }
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
+        }
+        .button-group {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
         }
         .buttons button {
-            padding: 15px;
+            padding: 10px;
             background-color: #007BFF;
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            font-size: 1em;
+            font-size: 0.9em;
+            flex: 1;
+        }
+        .buttons .restore-button {
+            padding: 5px;
+            background-color: #FF5722;
+            font-size: 0.7em;
+            width: 20%;
         }
         .buttons button:hover {
             background-color: #0056b3;
+        }
+        .buttons .restore-button:hover {
+            background-color: #E64A19;
         }
         .buttons button:active {
             transform: scale(0.98);
@@ -58,7 +78,7 @@
             border-radius: 8px;
             padding: 16px;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
@@ -82,14 +102,34 @@
     <div class="container">
         <h1>H5GG Memory Editor</h1>
         <div class="buttons">
-            <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
-            <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
-            <button onclick="modify('广告15', '0.4', 'adsAttack15Value', '15.9991', 'F64', '0.1', '0x100')">广告攻击15</button>
-            <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
-            <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
-            <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
-            <button onclick="modify('幸运一击', '0.0013', 'luckyHitValue', '0.04', 'F64')">幸运一击</button>
-            <button onclick="modify('技能CD', '0.45', 'skillCDValue', '1', 'F64')">CD修改</button>
+            <div class="button-group">
+                <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
+                <button class="restore-button" onclick="restore('闪避', 'dodgeValue', '0.0082', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
+                <button class="restore-button" onclick="restore('广告80', 'adsAttack80Value', '0.4', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
+                <button class="restore-button" onclick="restore('技能伤害', 'skillDamageValue', '2.8023', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
+                <button class="restore-button" onclick="restore('宠物伤害', 'petDamageValue', '0.1047', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
+                <button class="restore-button" onclick="restore('BOSS伤害', 'bossDamageValue', '0.1113', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('幸运一击', '0.0013', 'luckyHitValue', '0.04', 'F64')">幸运一击</button>
+                <button class="restore-button" onclick="restore('幸运一击', 'luckyHitValue', '0.0013', 'F64')">恢复</button>
+            </div>
+            <div class="button-group">
+                <button onclick="modify('技能CD', '0.45', 'skillCDValue', '1', 'F64')">CD修改</button>
+                <button class="restore-button" onclick="restore('技能CD', 'skillCDValue', '0.45', 'F64')">恢复</button>
+            </div>
         </div>
     </div>
     <div id="toast" class="toast">成功</div>
@@ -129,6 +169,20 @@
                 h5gg.editAll(editValue, dataType);
                 h5gg.clearResults();
                 showToast(`${actionName} 修改成功`);
+            }
+        }
+
+        function restore(actionName, storageKey, initialValue, dataType) {
+            let storedValue = getStoredValue(storageKey);
+            if (storedValue !== null && storedValue !== "") {
+                h5gg.clearResults();
+                h5gg.searchNumber(storedValue, dataType, '0x0', '0x200000000');
+                h5gg.editAll(initialValue, dataType);
+                h5gg.clearResults();
+                storeValue(storageKey, initialValue);
+                showToast(`${actionName} 已恢复初始值`);
+            } else {
+                showToast(`${actionName} 没有可恢复的值`);
             }
         }
     </script>

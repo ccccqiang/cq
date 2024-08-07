@@ -10,6 +10,10 @@
             background-color: #f4f4f4;
             margin: 0;
             padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         h1 {
             text-align: center;
@@ -18,12 +22,14 @@
             margin-bottom: 10px;
         }
         .container {
+            width: 100%;
             max-width: 300px;
-            margin: 0 auto;
             background: #fff;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 90vh;
         }
         .buttons {
             display: flex;
@@ -35,7 +41,7 @@
             background-color: #007BFF;
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             font-size: 0.9em;
@@ -63,20 +69,11 @@
         }
         .toast.show {
             visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
-        @-webkit-keyframes fadein {
+        @keyframes fadein {
             from {bottom: 0; opacity: 0;} 
             to {bottom: 20px; opacity: 1;}
-        }
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 20px; opacity: 1;}
-        }
-        @-webkit-keyframes fadeout {
-            from {bottom: 20px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
         }
         @keyframes fadeout {
             from {bottom: 20px; opacity: 1;}
@@ -85,17 +82,18 @@
     </style>
 </head>
 <body>
-    <h1>H5GG Memory Editor</h1>
     <div class="container">
+        <h1>H5GG Memory Editor</h1>
         <div class="buttons">
-            <button onclick="action1()">闪避</button>
-            <button onclick="action2()">广告攻击</button>
-            <button onclick="action3()">技能伤害</button>
-            <button onclick="action4()">宠物伤害</button>
-            <button onclick="action5()">BOSS伤害</button>
-            <button onclick="action6()">幸运一击</button>
-            <button onclick="action7()">刺刺</button>
-            <button onclick="action8()">无限击飞</button>
+            <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
+            <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
+            <button onclick="modify('广告15', '0.4', 'adsAttack15Value', '15.9991', 'F64', '0.1', '0x100')">广告攻击15</button>
+            <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
+            <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
+            <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
+            <button onclick="modify('幸运一击', '0.0013', 'luckyHitValue', '0.04', 'F64')">幸运一击</button>
+            <button onclick="modify('技能CD', '0.45', 'skillCDValue', '1', 'F64')">CD修改</button>
+            <!-- 添加更多按钮 -->
         </div>
     </div>
     <div id="toast" class="toast">成功</div>
@@ -105,58 +103,37 @@
             var toast = document.getElementById("toast");
             toast.textContent = message;
             toast.className = "toast show";
-            setTimeout(function() {
+            setTimeout(() => {
                 toast.className = toast.className.replace("show", "");
             }, 3000);
         }
 
-        function action1() {
-            h5gg.clearResults();
-            h5gg.searchNumber('0.0082', 'F64', '0x0', '0x200000000');
-            h5gg.editAll("1", 'F64');
-            h5gg.clearResults();
-            showToast('闪避修改成功');
+        function getStoredValue(key) {
+            return localStorage.getItem(key);
         }
 
-        function action2() {
-            h5gg.clearResults();
-            h5gg.searchNumber('0.3', 'F64', '0x0', '0x200000000');
-            h5gg.searchNearby('0.08', 'F64', '0x100');
-            h5gg.editAll('80.9991', 'F64');
-            h5gg.clearResults();
-            showToast('广告攻击修改成功80');
+        function storeValue(key, value) {
+            localStorage.setItem(key, value);
         }
 
-        function action3() {
-            h5gg.clearResults();
-            h5gg.searchNumber('2.8023', 'F64', '0x0', '0x200000000');
-            h5gg.editAll("100.9991", 'F64');
-            h5gg.clearResults();
-            showToast('技能伤害修改成功100');
-        }
-
-        function action4() {
-            h5gg.clearResults();
-            h5gg.searchNumber('0.1047', 'F64', '0x0', '0x200000000');
-            h5gg.editAll("10.9991", 'F64');
-            h5gg.clearResults();
-            showToast('宠物伤害修改成功10');
-        }
-
-        function action5() {
-            h5gg.clearResults();
-            h5gg.searchNumber('0.1113', 'F64', '0x0', '0x200000000');
-            h5gg.editAll("8.9991", 'F64');
-            h5gg.clearResults();
-            showToast('对BOSS伤害修改成功8');
-        }
-
-        function action6() {
-            h5gg.clearResults();
-            h5gg.searchNumber('0.0039', 'F64', '0x0', '0x200000000');
-            h5gg.editAll("0.29991", 'F64');
-            h5gg.clearResults();
-            showToast('幸运一击修改成功02');
+        function modify(actionName, searchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
+            let storedValue = getStoredValue(storageKey);
+            let editValue = prompt(`请输入${actionName}要修改的值:`, storedValue || defaultEditValue);
+            if (editValue !== null && editValue !== "") {
+                storeValue(storageKey, editValue);
+                h5gg.clearResults();
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
+                if (nearbyValue && nearbyOffset) {
+                    h5gg.searchNearby(nearbyValue, dataType, nearbyOffset);
+                }
+                if (additionalNearbyValue && additionalNearbyOffset) {
+                    h5gg.searchNearby(additionalNearbyValue, dataType, additionalNearbyOffset);
+                }
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000'); // 再次搜索
+                h5gg.editAll(editValue, dataType);
+                h5gg.clearResults();
+                showToast(`${actionName} 修改成功`);
+            }
         }
     </script>
 </body>

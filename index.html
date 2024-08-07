@@ -7,40 +7,40 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e0e0e0;
+            background-color: #f5f5f5;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-        }
         .container {
             width: 100%;
             max-width: 400px;
             background: #ffffff;
-            padding: 20px;
+            padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
             max-height: 90vh;
         }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
         .buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
         .buttons button {
-            padding: 12px;
+            padding: 15px;
             background-color: #007BFF;
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
             font-size: 1em;
@@ -59,12 +59,12 @@
             background-color: #333;
             color: #fff;
             text-align: center;
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 16px;
             position: fixed;
             z-index: 1;
             left: 50%;
-            bottom: 20px;
+            bottom: 30px;
             font-size: 14px;
         }
         .toast.show {
@@ -73,20 +73,21 @@
         }
         @keyframes fadein {
             from {bottom: 0; opacity: 0;} 
-            to {bottom: 20px; opacity: 1;}
+            to {bottom: 30px; opacity: 1;}
         }
         @keyframes fadeout {
-            from {bottom: 20px; opacity: 1;}
+            from {bottom: 30px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>CiShen</h1>
+        <h1>H5GG Memory Editor</h1>
         <div class="buttons">
             <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
             <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
+            <button onclick="modify('广告15', '0.4', 'adsAttack15Value', '15.9991', 'F64', '0.1', '0x100')">广告攻击15</button>
             <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
             <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
             <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
@@ -114,20 +115,20 @@
             localStorage.setItem(key, value);
         }
 
-        function modify(actionName, initialSearchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
+        function modify(actionName, searchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
             let storedValue = getStoredValue(storageKey);
             let editValue = prompt(`请输入${actionName}要修改的值:`, storedValue || defaultEditValue);
             if (editValue !== null && editValue !== "") {
                 storeValue(storageKey, editValue);
                 h5gg.clearResults();
-                h5gg.searchNumber(storedValue || initialSearchValue, dataType, '0x0', '0x200000000');
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
                 if (nearbyValue && nearbyOffset) {
                     h5gg.searchNearby(nearbyValue, dataType, nearbyOffset);
                 }
                 if (additionalNearbyValue && additionalNearbyOffset) {
                     h5gg.searchNearby(additionalNearbyValue, dataType, additionalNearbyOffset);
                 }
-                h5gg.searchNumber(storedValue || initialSearchValue, dataType, '0x0', '0x200000000'); // 再次搜索上次的值
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000'); // 再次搜索
                 h5gg.editAll(editValue, dataType);
                 h5gg.clearResults();
                 showToast(`${actionName} 修改成功`);

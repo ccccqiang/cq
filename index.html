@@ -6,78 +6,75 @@
     <title>H5GG Memory Editor</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: #333;
         }
         .container {
-            width: 100%;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
             max-width: 400px;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            max-height: 90vh;
         }
         h1 {
-            text-align: center;
-            color: #333;
-            font-size: 2em;
             margin-bottom: 20px;
+            font-size: 1.8em;
         }
         .buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .buttons button {
             padding: 15px;
             background-color: #007BFF;
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            transition: background-color 0.3s ease, transform 0.2s ease;
             font-size: 1em;
         }
         .buttons button:hover {
             background-color: #0056b3;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .buttons button:active {
             transform: scale(0.98);
         }
         .toast {
             visibility: hidden;
-            min-width: 200px;
-            margin-left: -100px;
+            min-width: 250px;
             background-color: #333;
             color: #fff;
             text-align: center;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 16px;
             position: fixed;
             z-index: 1;
             left: 50%;
             bottom: 30px;
-            font-size: 14px;
+            transform: translateX(-50%);
+            font-size: 1em;
         }
         .toast.show {
             visibility: visible;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
         @keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
+            from {bottom: 20px; opacity: 0;}
             to {bottom: 30px; opacity: 1;}
         }
         @keyframes fadeout {
             from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            to {bottom: 20px; opacity: 0;}
         }
     </style>
 </head>

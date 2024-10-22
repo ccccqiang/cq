@@ -4,7 +4,7 @@ This project is based on the H5GG platform and aims to modify and optimize vario
 
 ## Features
 
-- Support for modifications of multiple H5 games
+- Support for modifications of multiple IOS games
 - Enhanced game performance and user experience
 - Detailed modification guides
 

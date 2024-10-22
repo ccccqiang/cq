@@ -38,6 +38,7 @@
             transform: translate(-50%, -50%); /* 使其真正居中 */
             padding: 40px;
             max-width: 600px;
+            width: 90%; /* 自适应宽度 */
             background: var(--white);
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
@@ -121,6 +122,48 @@
             color: var(--white);
             margin-top: 30px;
             border-radius: 15px; /* 圆角 */
+        }
+
+        /* 媒体查询: 针对小屏幕设备 */
+        @media (max-width: 600px) {
+            .floating-window {
+                padding: 20px; /* 减小内边距 */
+            }
+
+            h1 {
+                font-size: 2em; /* 减小标题大小 */
+            }
+
+            nav ul li {
+                margin: 0 10px; /* 减小导航项间距 */
+            }
+
+            nav ul li a {
+                padding: 8px 15px; /* 减小导航链接的内边距 */
+            }
+
+            h2 {
+                font-size: 1.5em; /* 减小子标题大小 */
+            }
+
+            .project-link {
+                padding: 8px 10px; /* 减小项目链接的内边距 */
+            }
+        }
+
+        /* 媒体查询: 针对中等屏幕设备 */
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .floating-window {
+                padding: 30px; /* 调整内边距 */
+            }
+
+            h1 {
+                font-size: 2.2em; /* 调整标题大小 */
+            }
+
+            h2 {
+                font-size: 1.8em; /* 调整子标题大小 */
+            }
         }
     </style>
 </head>

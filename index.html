@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="欢迎来到我的主页，展示我的项目和个人介绍。">
+    <meta name="keywords" content="个人主页, 项目展示, H5GG, 次神游戏, 背包乱斗">
     <title>我的主页</title>
     <style>
         body {
@@ -14,13 +16,13 @@
             line-height: 1.6;
         }
         header {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: #fff;
             padding: 20px 0;
             text-align: center;
             position: sticky;
             top: 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         nav ul {
             list-style: none;
@@ -33,11 +35,14 @@
         nav ul li a {
             color: #fff;
             text-decoration: none;
-            transition: color 0.3s;
+            transition: color 0.3s, background 0.3s;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         nav ul li a:hover {
-            color: #ffd700;
-            text-decoration: underline;
+            background-color: #ffd700;
+            color: #333;
         }
         main {
             padding: 20px;
@@ -48,12 +53,15 @@
             margin: 20px 0;
             padding: 20px;
             background: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
         }
         section:hover {
-            transform: scale(1.02);
+            transform: translateY(-5px);
+        }
+        h2 {
+            color: #007bff;
         }
         footer {
             text-align: center;
@@ -62,7 +70,35 @@
             color: #fff;
             margin-top: 20px;
         }
-        /* 响应式设计 */
+        .project-link {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.3s;
+            margin: 5px 0;
+        }
+        .project-link:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        .back-to-top {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #007bff;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .back-to-top:hover {
+            background: #0056b3;
+        }
         @media (max-width: 600px) {
             nav ul li {
                 display: block;
@@ -86,12 +122,35 @@
     <main>
         <section id="about">
             <h2>关于我</h2>
-            <p>这是关于我的简短介绍，展示我的背景和兴趣。</p>
+            <p>我是一名对编程充满热情的开发者，专注于前端开发和游戏修改。拥有多年的项目经验，熟悉多种编程语言和技术框架。</p>
         </section>
 
         <section id="projects">
             <h2>项目</h2>
-            <p>这里展示我的项目，包括使用的技术和实现的功能。</p>
+<!--            <p>这里展示我的项目，包括使用的技术和实现的功能。</p>-->
+            <h3>H5GG 下的项目</h3>
+
+            <div>
+                <h4>次神游戏修改功能</h4>
+                <p>该项目是对次神游戏的修改，主要功能包括：</p>
+                <ul>
+                    <li>增强游戏玩法</li>
+                    <li>优化游戏性能</li>
+                </ul>
+                <p>点击以下链接查看项目：</p>
+                <p><a class="project-link" href="https://ccccqiang.github.io/cq/cishen.html" target="_blank">次神游戏修改功能</a></p>
+            </div>
+
+            <div>
+                <h4>背包乱斗修改功能</h4>
+                <p>该项目是对背包乱斗的修改，主要功能包括：</p>
+                <ul>
+                    <li>局内无限金币</li>
+                    <li>改善用户体验</li>
+                </ul>
+                <p>点击以下链接查看项目：</p>
+                <p><a class="project-link" href="https://ccccqiang.github.io/cq/bb.html" target="_blank">背包乱斗修改功能</a></p>
+            </div>
         </section>
 
         <section id="contact">
@@ -104,8 +163,22 @@
         </section>
     </main>
 
+    <a href="#top" class="back-to-top">返回顶部</a>
+
     <footer>
         <p>&copy; 2024 我的主页. 保留所有权利.</p>
     </footer>
+
+    <script>
+        // 返回顶部按钮
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        };
+    </script>
 </body>
 </html>

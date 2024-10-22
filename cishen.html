@@ -23,6 +23,10 @@
             text-align: center;
             width: 90%;
             max-width: 300px;
+
+            max-height: 70%; /* 限制高度，允许下滑 */
+            overflow-y: auto; /* 启用垂直滚动条 */
+
             position: fixed;
             top: 10%;
             right: 10px;
@@ -100,27 +104,32 @@
 </head>
 <body>
     <div class="container">
-        <h1>H5GG Memory Editor</h1>
+        <h1>Ci Shen</h1>
         <div class="buttons">
             <div class="button-group">
-                <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
-                <button class="restore-button" onclick="restore('闪避', 'dodgeValue', '0.0082', 'F64')">恢复</button>
+
+        
+
+<button onclick="action9()">重置搜索</button>
+</div>
+                    <div class="button-group">
+            <button onclick="action1()">闪避</button>
             </div>
             <div class="button-group">
-                <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
-                <button class="restore-button" onclick="restore('广告80', 'adsAttack80Value', '0.4', 'F64')">恢复</button>
+                <button onclick="modify('广告80', '0.5', 'adsAttack80Value', '80.9991', 'F64', '0.12', '0x100')">广告攻击80</button>
+                <button class="restore-button" onclick="restore('广告80', 'adsAttack80Value', '0.5', 'F64')">恢复</button>
             </div>
             <div class="button-group">
                 <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
                 <button class="restore-button" onclick="restore('技能伤害', 'skillDamageValue', '2.8023', 'F64')">恢复</button>
             </div>
             <div class="button-group">
-                <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
-                <button class="restore-button" onclick="restore('宠物伤害', 'petDamageValue', '0.1047', 'F64')">恢复</button>
+                <button onclick="modify('宠物伤害', '1.4985', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
+                <button class="restore-button" onclick="restore('宠物伤害', 'petDamageValue', '0.1479', 'F64')">恢复</button>
             </div>
             <div class="button-group">
-                <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
-                <button class="restore-button" onclick="restore('BOSS伤害', 'bossDamageValue', '0.1113', 'F64')">恢复</button>
+                <button onclick="modify('BOSS伤害', '1.1106', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
+                <button class="restore-button" onclick="restore('BOSS伤害', 'bossDamageValue', '1.1106', 'F64')">恢复</button>
             </div>
             <div class="button-group">
                 <button onclick="modify('幸运一击', '0.0013', 'luckyHitValue', '0.04', 'F64')">幸运一击</button>
@@ -129,10 +138,18 @@
             <div class="button-group">
                 <button onclick="modify('技能CD', '0.45', 'skillCDValue', '1', 'F64')">CD修改</button>
                 <button class="restore-button" onclick="restore('技能CD', 'skillCDValue', '0.45', 'F64')">恢复</button>
+
+            </div>
+ <div class="button-group">
+                <button onclick="modify('最终攻击', '0.02', 'zuizhong', '32.9991', 'F64')">最终攻击修改</button>
+                <button class="restore-button" onclick="restore('最终', 'zuizhong', '0.02', 'F64')">恢复</button>
+
             </div>
             <!-- Return button -->
             <div class="button-group">
                 <button onclick="window.location.href='https://ccccqiang.github.io/cq/'">返回</button>
+            </div>
+
             </div>
         </div>
     </div>
@@ -156,20 +173,34 @@
             localStorage.setItem(key, value);
         }
 
+        function action9() {
+            h5gg.clearResults();
+            h5gg.clearResults();
+            showToast('重置成功');
+         }
+
+        function action1() {
+            h5gg.clearResults();
+            h5gg.searchNumber('0.0082', 'F64', '0x0', '0x200000000');
+            h5gg.editAll("1", 'F64');
+            h5gg.clearResults();
+            showToast('闪避修改成功');
+        }
+
         function modify(actionName, searchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
             let storedValue = getStoredValue(storageKey);
             let editValue = prompt(`请输入${actionName}要修改的值:`, storedValue || defaultEditValue);
             if (editValue !== null && editValue !== "") {
                 storeValue(storageKey, editValue);
                 h5gg.clearResults();
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000000');
                 if (nearbyValue && nearbyOffset) {
                     h5gg.searchNearby(nearbyValue, dataType, nearbyOffset);
                 }
                 if (additionalNearbyValue && additionalNearbyOffset) {
                     h5gg.searchNearby(additionalNearbyValue, dataType, additionalNearbyOffset);
                 }
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000'); // 再次搜索
+                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000000'); // 再次搜索
                 h5gg.editAll(editValue, dataType);
                 h5gg.clearResults();
                 showToast(`${actionName} 修改成功`);
@@ -180,7 +211,7 @@
             let storedValue = getStoredValue(storageKey);
             if (storedValue !== null && storedValue !== "") {
                 h5gg.clearResults();
-                h5gg.searchNumber(storedValue, dataType, '0x0', '0x200000000');
+                h5gg.searchNumber(storedValue, dataType, '0x0', '0x200000000000');
                 h5gg.editAll(initialValue, dataType);
                 h5gg.clearResults();
                 storeValue(storageKey, initialValue);

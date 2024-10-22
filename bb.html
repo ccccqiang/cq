@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索与修改示例</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 1em;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 20px; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 20px; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>搜索与修改</h1>
+        <div class="button-group">
+            <button onclick="searchValue('12', 'I64')">搜索12</button>
+            <button onclick="searchValue('11', 'I64')">搜索11</button>
+            <button onclick="modifyValue('9999', 'I64')">将11改为9999</button>
+        </div>
+    </div>
+    <div id="toast" class="toast">成功</div>
+
+    <script>
+        function showToast(message) {
+            var toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.className = "toast show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        function searchValue(searchValue, dataType) {
+            h5gg.clearResults();
+            h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
+            showToast(`已搜索值: ${searchValue}`);
+        }
+
+        function modifyValue(newValue, dataType) {
+            // 假设这里存储的是11的值
+            h5gg.searchNumber('11', dataType, '0x0', '0x200000000');
+            h5gg.editAll(newValue, dataType);
+            h5gg.clearResults();
+            showToast(`已将值 11 修改为: ${newValue}`);
+        }
+    </script>
+</body>
+</html>

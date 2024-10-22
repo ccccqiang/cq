@@ -1,23 +1,15 @@
-# 项目名称
+# H5GG Game Modification Project
 
-简要描述项目的目的和功能。
+This project is based on the H5GG platform and aims to modify and optimize various games to enhance user experience and functionality.
 
-## 目录
+## Features
 
-- [特性](#特性)
-- [安装](#安装)
-- [用法](#用法)
-- [贡献](#贡献)
-- [许可证](#许可证)
+- Support for modifications of multiple H5 games
+- Enhanced game performance and user experience
+- Detailed modification guides
 
-## 特性
+## Installation
 
-- 特性1
-- 特性2
-- 特性3
-
-## 安装
-
-1. 克隆此仓库：
+1. Clone this repository:
    ```bash
-   git clone https://github.com/用户名/项目名.git
+   git clone https://github.com/ccccqiang/cq.git

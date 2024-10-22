@@ -1,190 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H5GG Memory Editor</title>
+    <title>我的主页</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: transparent;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            padding: 0;
+            background-color: #f4f4f4;
             color: #333;
+            line-height: 1.6;
         }
-        .container {
+        header {
+            background: #007bff;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        nav ul li a:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        section {
+            margin: 20px 0;
+            padding: 20px;
             background: #fff;
-            padding: 20px 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        section:hover {
+            transform: scale(1.02);
+        }
+        footer {
             text-align: center;
-            width: 90%;
-            max-width: 300px;
-            position: fixed;
-            top: 10%;
-            right: 10px;
-            z-index: 1000;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 1.4em;
-        }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .button-group {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            align-items: center;
-        }
-        .buttons button {
-            padding: 10px;
-            background-color: #007BFF;
+            padding: 10px 0;
+            background: #007bff;
             color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-size: 0.9em;
-            flex: 1;
+            margin-top: 20px;
         }
-        .buttons .restore-button {
-            padding: 5px;
-            background-color: #FF5722;
-            font-size: 0.7em;
-            width: 20%;
-        }
-        .buttons button:hover {
-            background-color: #0056b3;
-        }
-        .buttons .restore-button:hover {
-            background-color: #E64A19;
-        }
-        .buttons button:active {
-            transform: scale(0.98);
-        }
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 1em;
-        }
-        .toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        @keyframes fadein {
-            from {bottom: 20px; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 20px; opacity: 0;}
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            nav ul li {
+                display: block;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>H5GG Memory Editor</h1>
-        <div class="buttons">
-            <div class="button-group">
-                <button onclick="modify('闪避', '0.0082', 'dodgeValue', '1', 'F64')">闪避</button>
-                <button class="restore-button" onclick="restore('闪避', 'dodgeValue', '0.0082', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('广告80', '0.4', 'adsAttack80Value', '80.9991', 'F64', '0.1', '0x100', '4.9', '0x100')">广告攻击80</button>
-                <button class="restore-button" onclick="restore('广告80', 'adsAttack80Value', '0.4', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('技能伤害', '2.8023', 'skillDamageValue', '100.9991', 'F64')">技能伤害</button>
-                <button class="restore-button" onclick="restore('技能伤害', 'skillDamageValue', '2.8023', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('宠物伤害', '0.1047', 'petDamageValue', '19.9991', 'F64')">宠物伤害</button>
-                <button class="restore-button" onclick="restore('宠物伤害', 'petDamageValue', '0.1047', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('BOSS伤害', '0.1113', 'bossDamageValue', '8.9991', 'F64')">对BOSS伤害</button>
-                <button class="restore-button" onclick="restore('BOSS伤害', 'bossDamageValue', '0.1113', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('幸运一击', '0.0013', 'luckyHitValue', '0.04', 'F64')">幸运一击</button>
-                <button class="restore-button" onclick="restore('幸运一击', 'luckyHitValue', '0.0013', 'F64')">恢复</button>
-            </div>
-            <div class="button-group">
-                <button onclick="modify('技能CD', '0.45', 'skillCDValue', '1', 'F64')">CD修改</button>
-                <button class="restore-button" onclick="restore('技能CD', 'skillCDValue', '0.45', 'F64')">恢复</button>
-            </div>
-        </div>
-    </div>
-    <div id="toast" class="toast">成功</div>
+    <header>
+        <h1>欢迎来到我的主页</h1>
+        <nav>
+            <ul>
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#projects">项目</a></li>
+                <li><a href="#contact">联系我</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <script>
-        function showToast(message) {
-            var toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.className = "toast show";
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000);
-        }
+    <main>
+        <section id="about">
+            <h2>关于我</h2>
+            <p>这是关于我的简短介绍，展示我的背景和兴趣。</p>
+        </section>
 
-        function getStoredValue(key) {
-            return localStorage.getItem(key);
-        }
+        <section id="projects">
+            <h2>项目</h2>
+            <p>这里展示我的项目，包括使用的技术和实现的功能。</p>
+        </section>
 
-        function storeValue(key, value) {
-            localStorage.setItem(key, value);
-        }
+        <section id="contact">
+            <h2>联系我</h2>
+            <p>你可以通过以下方式联系我：</p>
+            <ul>
+                <li>邮箱: example@example.com</li>
+                <li>电话: 123-456-7890</li>
+            </ul>
+        </section>
+    </main>
 
-        function modify(actionName, searchValue, storageKey, defaultEditValue, dataType, nearbyValue = null, nearbyOffset = null, additionalNearbyValue = null, additionalNearbyOffset = null) {
-            let storedValue = getStoredValue(storageKey);
-            let editValue = prompt(`请输入${actionName}要修改的值:`, storedValue || defaultEditValue);
-            if (editValue !== null && editValue !== "") {
-                storeValue(storageKey, editValue);
-                h5gg.clearResults();
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
-                if (nearbyValue && nearbyOffset) {
-                    h5gg.searchNearby(nearbyValue, dataType, nearbyOffset);
-                }
-                if (additionalNearbyValue && additionalNearbyOffset) {
-                    h5gg.searchNearby(additionalNearbyValue, dataType, additionalNearbyOffset);
-                }
-                h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000'); // 再次搜索
-                h5gg.editAll(editValue, dataType);
-                h5gg.clearResults();
-                showToast(`${actionName} 修改成功`);
-            }
-        }
-
-        function restore(actionName, storageKey, initialValue, dataType) {
-            let storedValue = getStoredValue(storageKey);
-            if (storedValue !== null && storedValue !== "") {
-                h5gg.clearResults();
-                h5gg.searchNumber(storedValue, dataType, '0x0', '0x200000000');
-                h5gg.editAll(initialValue, dataType);
-                h5gg.clearResults();
-                storeValue(storageKey, initialValue);
-                showToast(`${actionName} 已恢复初始值`);
-            } else {
-                showToast(`${actionName} 没有可恢复的值`);
-            }
-        }
-    </script>
+    <footer>
+        <p>&copy; 2024 我的主页. 保留所有权利.</p>
+    </footer>
 </body>
 </html>

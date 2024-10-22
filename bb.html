@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bbld</title>
+    <title>BBLD</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
+            background-color: transparent;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            color: #333;
         }
         .container {
             background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
+            width: 90%;
+            max-width: 300px;
+            position: fixed;
+            top: 10%;
+            right: 10px;
+            z-index: 1000;
         }
         .button-group {
             margin-top: 10px;
@@ -63,6 +71,17 @@
             from {bottom: 30px; opacity: 1;}
             to {bottom: 20px; opacity: 0;}
         }
+        .return-link {
+            margin-top: 20px;
+            display: block;
+            font-size: 0.9em;
+            color: #007BFF;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .return-link:hover {
+            color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -71,6 +90,7 @@
         <div class="button-group">
             <button onclick="searchAndModify()">无限金币</button>
         </div>
+        <a class="return-link" href="https://ccccqiang.github.io/cq/">返回</a>
     </div>
     <div id="toast" class="toast">成功</div>
 

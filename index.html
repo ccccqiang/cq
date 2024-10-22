@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Welcome to my homepage, showcasing my projects and personal introduction.">
-    <meta name="keywords" content="homepage, project showcase, H5GG, Cishen Game, Backpack Battle">
+    <meta name="description" content="Welcome to my floating window style homepage, showcasing my projects and personal introduction.">
+    <meta name="keywords" content="homepage, project showcase, floating window, web design">
     <link rel="canonical" href="https://yourwebsite.com">
-    <meta property="og:title" content="My Homepage">
-    <meta property="og:description" content="Showcasing my projects and personal introduction.">
-    <meta property="og:image" content="https://yourwebsite.com/image.jpg">
-    <title>My Homepage</title>
+    <title>Floating Window Homepage</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #007bff;
             --secondary-color: #0056b3;
-            --background-color: #f4f4f4;
+            --background-color: rgba(244, 244, 244, 0.8); /* 半透明背景 */
             --text-color: #333;
             --white: #fff;
             --hover-color: #ffd700;
@@ -25,136 +22,98 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--background-color);
+            background: url('https://yourbackgroundimage.com/image.jpg') no-repeat center center fixed; /* 背景图片 */
+            background-size: cover;
             color: var(--text-color);
             line-height: 1.6;
-            scroll-behavior: smooth; /* 平滑滚动 */
+            scroll-behavior: smooth;
         }
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--white);
-            padding: 40px 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 1000; /* 确保header在最上面 */
+
+        .floating-window {
+            position: fixed; /* 固定位置 */
+            top: 50%; /* 垂直居中 */
+            left: 50%; /* 水平居中 */
+            transform: translate(-50%, -50%); /* 使其真正居中 */
+            padding: 40px;
+            max-width: 600px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            overflow: auto; /* 如果内容超出，显示滚动条 */
+            max-height: 80vh; /* 限制高度 */
         }
+
         h1 {
             font-family: 'Playfair Display', serif;
             font-size: 2.5em;
             margin: 0;
+            text-align: center;
         }
+
+        nav {
+            margin-top: 20px;
+            text-align: center;
+        }
+
         nav ul {
             list-style: none;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
+            display: inline-block;
         }
+
         nav ul li {
-            margin: 0 20px;
+            margin: 0 15px;
+            display: inline;
         }
+
         nav ul li a {
-            color: var(--white);
+            color: var(--primary-color);
             text-decoration: none;
-            transition: all 0.3s;
             padding: 10px 20px;
             border-radius: 30px;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
         }
+
         nav ul li a:hover {
             background-color: var(--hover-color);
-            transform: translateY(-3px);
         }
-        main {
-            padding: 40px 20px;
-            max-width: 900px;
-            margin: auto;
-        }
+
         section {
-            margin: 30px 0;
-            padding: 30px;
-            background: var(--white);
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* 半透明背景 */
             border-radius: 10px;
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        section:hover {
-            transform: translateY(-5px);
-        }
+
         h2 {
             color: var(--primary-color);
             font-size: 2em;
             margin-bottom: 15px;
         }
-        h3 {
-            font-size: 1.5em;
-            color: var(--secondary-color);
-            margin: 10px 0;
-        }
+
         footer {
             text-align: center;
             padding: 20px 0;
             background: var(--primary-color);
             color: var(--white);
             margin-top: 30px;
-        }
-        .project-link {
-            display: inline-block;
-            padding: 12px 20px;
-            border-radius: 30px;
-            background: var(--primary-color);
-            color: var(--white);
-            text-decoration: none;
-            transition: all 0.3s;
-            margin: 10px 0;
-        }
-        .project-link:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-        .back-to-top {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 15px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            transition: background 0.3s;
-            z-index: 1000; /* 确保按钮在最上面 */
-        }
-        .back-to-top:hover {
-            background: var(--secondary-color);
-        }
-        @media (max-width: 600px) {
-            nav ul {
-                flex-direction: column;
-            }
-            nav ul li {
-                margin: 10px 0;
-            }
-            main {
-                padding: 20px;
-            }
+            border-radius: 15px; /* 圆角 */
         }
     </style>
 </head>
 <body>
-    <header id="top">
-        <h1>Welcome to My Homepage</h1>
+    <div class="floating-window">
+        <h1>Welcome to My Floating Window Homepage</h1>
         <nav>
             <ul>
                 <li><a href="#about">About Me</a></li>
                 <li><a href="#projects">Projects</a></li>
             </ul>
         </nav>
-    </header>
 
-    <main>
         <section id="about">
             <h2>About Me</h2>
             <p>I am a passionate developer focused on frontend development and game modifications. With years of project experience, I am familiar with various programming languages and technology frameworks.</p>
@@ -186,31 +145,10 @@
                 <p><a class="project-link" href="https://ccccqiang.github.io/cq/bb.html" target="_blank" aria-label="View Backpack Battle Modification">Backpack Battle Modification</a></p>
             </div>
         </section>
-    </main>
 
-    <a href="#top" class="back-to-top">Back to Top</a>
-
-    <footer>
-        <p>&copy; 2024 My Homepage. All rights reserved.</p>
-    </footer>
-
-    <script>
-        // Back to top button
-        const backToTopButton = document.querySelector('.back-to-top');
-        window.onscroll = function() {
-            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-                backToTopButton.style.display = 'block';
-            } else {
-                backToTopButton.style.display = 'none';
-            }
-        };
-
-        backToTopButton.onclick = function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        };
-    </script>
+        <footer>
+            <p>&copy; 2024 My Floating Window Homepage. All rights reserved.</p>
+        </footer>
+    </div>
 </body>
 </html>

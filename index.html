@@ -21,6 +21,28 @@
             --hover-color: #ffd700;
         }
 
+        html {
+            overflow-y: scroll; /* 强制显示垂直滚动条 */
+        }
+
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px; /* 滚动条的宽度 */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; /* 滚动条轨道的背景 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888; /* 滚动条的颜色 */
+            border-radius: 5px; /* 圆角 */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; /* 滚动条悬停时的颜色 */
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -71,16 +93,6 @@
             padding: 40px 20px;
             max-width: 900px;
             margin: auto;
-        }
-        .fixed-container {
-            position: fixed;
-            top: 10%;
-            left: 10px; /* 可以根据需要调整位置 */
-            width: 200px; /* 固定元素宽度 */
-            background: rgba(255, 255, 255, 0.8); /* 背景颜色 */
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000; /* 确保固定容器在上面 */
         }
         section {
             margin: 30px 0;
@@ -165,9 +177,6 @@
     </header>
 
     <main>
-        <div class="fixed-container">
-            <p>这是一个固定在视口的内容。</p>
-        </div>
         <section id="about">
             <h2>About Me</h2>
             <p>I am a passionate developer focused on frontend development and game modifications. With years of project experience, I am familiar with various programming languages and technology frameworks.</p>

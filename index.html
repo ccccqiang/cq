@@ -21,28 +21,6 @@
             --hover-color: #ffd700;
         }
 
-        html {
-            overflow-y: scroll; /* 强制显示垂直滚动条 */
-        }
-
-        /* 自定义滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 10px; /* 滚动条的宽度 */
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; /* 滚动条轨道的背景 */
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888; /* 滚动条的颜色 */
-            border-radius: 5px; /* 圆角 */
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555; /* 滚动条悬停时的颜色 */
-        }
-
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -115,34 +93,6 @@
             color: var(--secondary-color);
             margin: 10px 0;
         }
-        <style>
-        /* 悬浮窗模式的样式 */
-        .float-mode {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 400px;
-            overflow: auto;
-            border: 2px solid var(--primary-color);
-            border-radius: 10px;
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-        }
-
-        .float-mode header {
-            position: static;
-            box-shadow: none;
-        }
-
-        .float-mode main {
-            padding: 20px;
-        }
-
-        .float-mode footer {
-            display: none;
-        }
         footer {
             text-align: center;
             padding: 20px 0;
@@ -200,11 +150,9 @@
             <ul>
                 <li><a href="#about">About Me</a></li>
                 <li><a href="#projects">Projects</a></li>
-                <li><button id="toggleFloatButton">Toggle Float Mode</button></li>
             </ul>
         </nav>
     </header>
-
 
     <main>
         <section id="about">
@@ -247,25 +195,6 @@
     </footer>
 
     <script>
-        // 获取按钮和页面元素
-        const toggleFloatButton = document.getElementById('toggleFloatButton');
-        const page = document.querySelector('body');
-
-        // 切换悬浮窗模式
-        let isFloatMode = false;
-        toggleFloatButton.addEventListener('click', () => {
-            if (isFloatMode) {
-                // 关闭悬浮窗模式
-                page.classList.remove('float-mode');
-                toggleFloatButton.textContent = 'Toggle Float Mode';
-            } else {
-                // 打开悬浮窗模式
-                page.classList.add('float-mode');
-                toggleFloatButton.textContent = 'Close Float Mode';
-            }
-            isFloatMode = !isFloatMode;
-        });
-
         // Back to top button
         const backToTopButton = document.querySelector('.back-to-top');
         window.onscroll = function() {
@@ -283,6 +212,5 @@
             });
         };
     </script>
-
 </body>
 </html>

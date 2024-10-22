@@ -28,6 +28,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
+            scroll-behavior: smooth; /* 平滑滚动 */
         }
         header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -37,6 +38,7 @@
             position: sticky;
             top: 0;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000; /* 确保header在最上面 */
         }
         h1 {
             font-family: 'Playfair Display', serif;
@@ -123,6 +125,7 @@
             border-radius: 30px;
             text-decoration: none;
             transition: background 0.3s;
+            z-index: 1000; /* 确保按钮在最上面 */
         }
         .back-to-top:hover {
             background: var(--secondary-color);
@@ -141,7 +144,7 @@
     </style>
 </head>
 <body>
-    <header>
+    <header id="top">
         <h1>Welcome to My Homepage</h1>
         <nav>
             <ul>

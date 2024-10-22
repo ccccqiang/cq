@@ -69,9 +69,7 @@
     <div class="container">
         <h1>搜索与修改</h1>
         <div class="button-group">
-            <button onclick="searchValue('12', 'I64')">搜索12</button>
-            <button onclick="searchValue('11', 'I64')">搜索11</button>
-            <button onclick="modifyValue('9999', 'I64')">将11改为9999</button>
+            <button onclick="searchAndModify()">搜索I64</button>
         </div>
     </div>
     <div id="toast" class="toast">成功</div>
@@ -86,18 +84,17 @@
             }, 3000);
         }
 
-        function searchValue(searchValue, dataType) {
+        function searchAndModify() {
             h5gg.clearResults();
-            h5gg.searchNumber(searchValue, dataType, '0x0', '0x200000000');
-            showToast(`已搜索值: ${searchValue}`);
-        }
+            h5gg.searchNumber('12', 'I64', '0x0', '0x200000000');
+            showToast('已搜索值: 12，请刷新一次');
 
-        function modifyValue(newValue, dataType) {
-            // 假设这里存储的是11的值
-            h5gg.searchNumber('11', dataType, '0x0', '0x200000000');
-            h5gg.editAll(newValue, dataType);
-            h5gg.clearResults();
-            showToast(`已将值 11 修改为: ${newValue}`);
+            setTimeout(() => {
+                h5gg.searchNumber('11', 'I64', '0x0', '0x200000000');
+                h5gg.editAll('9999', 'I64');
+                h5gg.clearResults();
+                showToast('已将值 11 修改为: 9999，请重启游戏');
+            }, 3000); // 等待3秒后进行第二次搜索和修改
         }
     </script>
 </body>

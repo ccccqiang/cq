@@ -1,10 +1,10 @@
 # H5GG Game Modification Project
 
-This project is based on the H5GG platform and aims to modify and optimize various games to enhance user experience and functionality.
+This project is based platform and aims to modify and optimize various games to enhance user experience and functionality.
 
 ## Features
 
-- Support for modifications of multiple IOS games
+- Support for modifications of multiple games
 - Enhanced game performance and user experience
 - Detailed modification guides
 

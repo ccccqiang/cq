@@ -12,19 +12,17 @@
         :root {
             --primary-color: #007bff;
             --secondary-color: #0056b3;
-            --background-color: rgba(244, 244, 244, 0.8); /* 半透明背景 */
+            --background-color: rgba(244, 244, 244, 0.8);
             --text-color: #333;
             --white: #fff;
             --hover-color: #ffd700;
-            --link-hover-color: #0056b3; /* 链接悬停颜色 */
-            --link-bg-hover-color: rgba(0, 0, 0, 0.1); /* 链接背景悬停颜色 */
         }
 
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background: url('https://yourbackgroundimage.com/image.jpg') no-repeat center fixed; /* 背景图片 */
+            background: url('https://yourbackgroundimage.com/image.jpg') no-repeat center fixed;
             background-size: cover;
             color: var(--text-color);
             line-height: 1.6;
@@ -32,19 +30,19 @@
         }
 
         .floating-window {
-            position: fixed; /* 固定位置 */
-            top: 50%; /* 垂直居中 */
-            left: 50%; /* 水平居中 */
-            transform: translate(-50%, -50%); /* 使其真正居中 */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             padding: 40px;
             max-width: 600px;
-            width: 90%; /* 自适应宽度 */
+            width: 90%;
             background: var(--white);
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             z-index: 1000;
-            overflow: auto; /* 如果内容超出，显示滚动条 */
-            max-height: 80vh; /* 限制高度 */
+            overflow: auto;
+            max-height: 80vh;
         }
 
         h1 {
@@ -81,13 +79,13 @@
 
         nav ul li a:hover {
             background-color: var(--hover-color);
-            color: var(--white); /* 悬停时改变链接文字颜色 */
+            color: var(--white);
         }
 
         section {
             margin: 20px 0;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.9); /* 半透明背景 */
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
@@ -107,12 +105,12 @@
             text-decoration: none;
             transition: background 0.3s, transform 0.3s;
             margin: 10px 0;
-            text-align: center; /* 使链接文本居中 */
+            text-align: center;
         }
 
         .project-link:hover {
             background: var(--secondary-color);
-            transform: translateY(-2px); /* 鼠标悬停时轻微上移 */
+            transform: translateY(-2px);
         }
 
         footer {
@@ -121,48 +119,48 @@
             background: var(--primary-color);
             color: var(--white);
             margin-top: 30px;
-            border-radius: 15px; /* 圆角 */
+            border-radius: 15px;
         }
 
         /* 媒体查询: 针对小屏幕设备 */
         @media (max-width: 600px) {
             .floating-window {
-                padding: 20px; /* 减小内边距 */
+                padding: 20px;
             }
 
             h1 {
-                font-size: 2em; /* 减小标题大小 */
+                font-size: 2em;
             }
 
             nav ul li {
-                margin: 0 10px; /* 减小导航项间距 */
+                margin: 0 10px;
             }
 
             nav ul li a {
-                padding: 8px 15px; /* 减小导航链接的内边距 */
+                padding: 8px 15px;
             }
 
             h2 {
-                font-size: 1.5em; /* 减小子标题大小 */
+                font-size: 1.5em;
             }
 
             .project-link {
-                padding: 8px 10px; /* 减小项目链接的内边距 */
+                padding: 8px 10px;
             }
         }
 
         /* 媒体查询: 针对中等屏幕设备 */
         @media (min-width: 601px) and (max-width: 1024px) {
             .floating-window {
-                padding: 30px; /* 调整内边距 */
+                padding: 30px;
             }
 
             h1 {
-                font-size: 2.2em; /* 调整标题大小 */
+                font-size: 2.2em;
             }
 
             h2 {
-                font-size: 1.8em; /* 调整子标题大小 */
+                font-size: 1.8em;
             }
         }
     </style>
@@ -182,48 +180,63 @@
             <p>I am a passionate developer focused on frontend development and game modifications. With years of project experience, I am familiar with various programming languages and technology frameworks.</p>
         </section>
 
-    <section id="projects">
-    <h2>Projects</h2>
-    <h3>Projects Under H5GG</h3>
+        <section id="projects">
+            <h2>Projects</h2>
 
-    <div>
-        <h4>Cishen Game Modification</h4>
-        <p>This project is a modification of the Cishen game, featuring:</p>
-        <ul>
-            <li>Enhanced gameplay</li>
-            <li>Optimized game performance</li>
-        </ul>
-        <p>Click the link below to view the project:</p>
-        <p><a class="project-link" href="https://ccccqiang.github.io/cq/cishen.html" target="_blank" aria-label="View Cishen Game Modification">Cishen Game Modification</a></p>
-    </div>
+            <h3 onclick="toggleVisibility('game-modifications')" style="cursor: pointer; color: var(--primary-color);">Game Modifications</h3>
+            <div id="game-modifications" style="display: none;">
+                <div>
+                    <h4>Cishen Game Modification</h4>
+                    <p>This project is a modification of the Cishen game, featuring:</p>
+                    <ul>
+                        <li>Enhanced gameplay</li>
+                        <li>Optimized game performance</li>
+                    </ul>
+                    <p>Click the link below to view the project:</p>
+                    <p><a class="project-link" href="https://ccccqiang.github.io/cq/cishen.html" target="_blank" aria-label="View Cishen Game Modification">Cishen Game Modification</a></p>
+                </div>
 
-    <div>
-        <h4>Backpack Battle Modification</h4>
-        <p>This project is a modification of Backpack Battle, featuring:</p>
-        <ul>
-            <li>Unlimited in-game coins</li>
-            <li>Improved user experience</li>
-        </ul>
-        <p>Click the link below to view the project:</p>
-        <p><a class="project-link" href="https://ccccqiang.github.io/cq/bb.html" target="_blank" aria-label="View Backpack Battle Modification">Backpack Battle Modification</a></p>
-    </div>
+                <div>
+                    <h4>Backpack Battle Modification</h4>
+                    <p>This project is a modification of Backpack Battle, featuring:</p>
+                    <ul>
+                        <li>Unlimited in-game coins</li>
+                        <li>Improved user experience</li>
+                    </ul>
+                    <p>Click the link below to view the project:</p>
+                    <p><a class="project-link" href="https://ccccqiang.github.io/cq/bb.html" target="_blank" aria-label="View Backpack Battle Modification">Backpack Battle Modification</a></p>
+                </div>
+            </div>
 
-    <div>
-        <h4>CS2 Logitech Macro</h4>
-        <p>This project includes Logitech macros for CS2, designed to enhance gameplay:</p>
-        <ul>
-            <li>Improved accuracy</li>
-            <li>Faster response time</li>
-        </ul>
-        <p>Click the link below to view the project:</p>
-        <p><a class="project-link" href="https://ccccqiang.github.io/cq/script.lua" target="_blank" aria-label="View CS2 Logitech Macro">CS2 Logitech Macro</a></p>
-    </div>
-</section>
-
+            <h3 onclick="toggleVisibility('tools')" style="cursor: pointer; color: var(--primary-color);">Tools</h3>
+            <div id="tools" style="display: none;">
+                <div>
+                    <h4>CS2 Logitech Macro</h4>
+                    <p>This project includes Logitech macros for CS2, designed to enhance gameplay:</p>
+                    <ul>
+                        <li>Improved accuracy</li>
+                        <li>Faster response time</li>
+                    </ul>
+                    <p>Click the link below to view the project:</p>
+                    <p><a class="project-link" href="https://ccccqiang.github.io/cq/script.lua" target="_blank" aria-label="View CS2 Logitech Macro">CS2 Logitech Macro</a></p>
+                </div>
+            </div>
+        </section>
 
         <footer>
             <p>&copy; 2024 My Homepage. All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        function toggleVisibility(id) {
+            const element = document.getElementById(id);
+            if (element.style.display === 'none' || element.style.display === '') {
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

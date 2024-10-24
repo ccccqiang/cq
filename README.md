@@ -1,12 +1,12 @@
-# H5GG Game Modification Project
+# Resource Sharing Platform
 
-This project is based platform and aims to modify and optimize various games to enhance user experience and functionality.
+This project aims to create a resource sharing platform focused on sharing high-quality technical articles, tutorials, tools, and open-source projects to enhance user experience and the convenience of knowledge acquisition.
 
 ## Features
 
-- Support for modifications of multiple games
-- Enhanced game performance and user experience
-- Detailed modification guides
+- Support for sharing various types of resources
+- Improved user browsing experience with optimized resource categorization and search functions
+- Detailed usage guides and tutorials for resources
 
 ## Installation
 

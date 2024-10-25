@@ -108,9 +108,8 @@
         }
 
         function searchAndModify() {
-            h5gg.require(7.8); // min version
             h5gg.clearResults();
-            h5gg.searchNumber("0.6", "F64", "0x0", "0xFFFFFFFFFFFFFFFF");
+            h5gg.searchNumber("0.6", "F64", "0x0", "0x200000000000");
             var count = h5gg.getResultsCount();
             var results = h5gg.getResults(count);
 
@@ -126,7 +125,7 @@
                 for (var i = 0; i < count; i++) {
                     h5gg.setValue(results[i].address, "50.06", "F64");
                 }
-            }, 500); // lock/freeze time interval (milliseconds)
+            }, 1000); // lock/freeze time interval (milliseconds)
         }
 
         function stopModifying() {

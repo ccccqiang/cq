@@ -88,7 +88,8 @@
     <div class="container">
         <h1>BB</h1>
         <div class="button-group">
-            <button onclick="searchAndModify()">英雄60技能</button>
+            <button onclick="searchAndModify('0.6', 50.06)">修改 0.6 为 50.06</button>
+            <button onclick="searchAndModify('5.15', 35.15)">修改 5.15 为 35.15</button>
             <button onclick="stopModifying()">停止修改</button>
         </div>
         <a class="return-link" href="https://ccccqiang.github.io/cq/">返回</a>
@@ -97,10 +98,6 @@
 
     <script>
         var locker;
-        var targetValues = {
-            "0.6": 50.06,
-            "5.15": 35.15
-        };
 
         function showToast(message) {
             var toast = document.getElementById("toast");
@@ -111,19 +108,9 @@
             }, 4000);
         }
 
-        function searchAndModify() {
+        function searchAndModify(valueToModify, targetValue) {
             h5gg.clearResults();
-            // 搜索值为 0.6 的 F64
-            h5gg.searchNumber("0.6", "F64", "0x0", "0x200000000000");
-            modifyValues("0.6");
-
-            // 搜索值为 5.15 的 F64
-            h5gg.clearResults();
-            h5gg.searchNumber("5.15", "F64", "0x0", "0x200000000000");
-            modifyValues("5.15");
-        }
-
-        function modifyValues(valueToModify) {
+            h5gg.searchNumber(valueToModify, "F64", "0x0", "0x200000000000");
             var count = h5gg.getResultsCount();
             var results = h5gg.getResults(count);
 
@@ -152,8 +139,8 @@
                     }
 
                     // 仅在当前值不匹配时修改
-                    if (currentValue !== targetValues[valueToModify]) {
-                        h5gg.setValue(results[i].address, targetValues[valueToModify].toString(), "F64");
+                    if (currentValue !== targetValue) {
+                        h5gg.setValue(results[i].address, targetValue.toString(), "F64");
                     }
                 }
             }, 5000); // 锁定时间间隔为5000毫秒（5秒）

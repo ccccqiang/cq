@@ -88,8 +88,8 @@
     <div class="container">
         <h1>BB</h1>
         <div class="button-group">
-            <button onclick="searchAndModify('0.6', 50.06)">修改 0.6 为 50.06</button>
-            <button onclick="searchAndModify('5.15', 35.15)">修改 5.15 为 35.15</button>
+            <button onclick="searchAndModify('0.6', '50.06', 'F64')">修改 0.6 为 50.06</button>
+            <button onclick="searchAndModify('5.15', '35.15', 'F64')">修改 5.15 为 35.15</button>
             <button onclick="stopModifying()">停止修改</button>
         </div>
         <a class="return-link" href="https://ccccqiang.github.io/cq/">返回</a>
@@ -108,42 +108,34 @@
             }, 4000);
         }
 
-        function searchAndModify(valueToModify, targetValue) {
+        function searchAndModify(originalValue, newValue, type) {
             h5gg.clearResults();
-            h5gg.searchNumber(valueToModify, "F64", "0x0", "0x200000000000");
+            h5gg.searchNumber(originalValue, type, "0x0", "0x200000000000");
             var count = h5gg.getResultsCount();
             var results = h5gg.getResults(count);
 
             if (count === 0) {
-                showToast(`未找到值: ${valueToModify}，请检查输入。`);
+                showToast('未找到值，请检查输入。');
                 return;
             }
 
-            showToast(`已搜索值: ${valueToModify}，开始锁定...`);
+            showToast(`已搜索值: ${originalValue}，开始锁定...`);
 
             locker = setInterval(function() {
                 console.log("running...");
-                h5gg.clearResults();
-                h5gg.searchNumber(valueToModify, "F64", "0x0", "0x200000000000");
-                var count = h5gg.getResultsCount();
-                var results = h5gg.getResults(count);
-
                 for (var i = 0; i < count; i++) {
-                    var currentValue = h5gg.getValue(results[i].address, "F64");
-
-                    // 检查当前值是否在合理范围内
-                    if (currentValue < 0 || currentValue > 100) { // 假设合理范围为0到100
-                        showToast('检测到不合理的值，停止修改。');
-                        clearInterval(locker);
-                        return;
-                    }
-
-                    // 仅在当前值不匹配时修改
-                    if (currentValue !== targetValue) {
-                        h5gg.setValue(results[i].address, targetValue.toString(), "F64");
+                    // 检查当前值是否是目标值，如果是，则跳过修改
+                    var currentValue = h5gg.getValue(results[i].address, type);
+                    if (currentValue !== newValue) {
+                        // 进行容错检查，确保新值在合理范围内
+                        if (Number(newValue) >= 0 && Number(newValue) <= 100) { // 假设合理范围是 0-100
+                            h5gg.setValue(results[i].address, newValue, type);
+                        } else {
+                            console.error('新值超出范围:', newValue);
+                        }
                     }
                 }
-            }, 5000); // 锁定时间间隔为5000毫秒（5秒）
+            }, 5000); // 修改频率每 5 秒一次
         }
 
         function stopModifying() {

@@ -97,6 +97,7 @@
 
     <script>
         var locker;
+        var targetValue = 50.06;
 
         function showToast(message) {
             var toast = document.getElementById("toast");
@@ -122,10 +123,27 @@
 
             locker = setInterval(function() {
                 console.log("running...");
+                h5gg.clearResults();
+                h5gg.searchNumber("0.6", "F64", "0x0", "0x200000000000");
+                var count = h5gg.getResultsCount();
+                var results = h5gg.getResults(count);
+
                 for (var i = 0; i < count; i++) {
-                    h5gg.setValue(results[i].address, "50.06", "F64");
+                    var currentValue = h5gg.getValue(results[i].address, "F64");
+
+                    // 检查当前值是否在合理范围内
+                    if (currentValue < 0 || currentValue > 100) { // 假设合理范围为0到100
+                        showToast('检测到不合理的值，停止修改。');
+                        clearInterval(locker);
+                        return;
+                    }
+
+                    // 仅在当前值不匹配时修改
+                    if (currentValue !== targetValue) {
+                        h5gg.setValue(results[i].address, targetValue.toString(), "F64");
+                    }
                 }
-            }, 3000); // lock/freeze time interval (milliseconds)
+            }, 5000); // 锁定时间间隔为5000毫秒（5秒）
         }
 
         function stopModifying() {

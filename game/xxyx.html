@@ -97,7 +97,10 @@
 
     <script>
         var locker;
-        var targetValue = 50.06;
+        var targetValues = {
+            "0.6": 50.06,
+            "5.15": 35.15
+        };
 
         function showToast(message) {
             var toast = document.getElementById("toast");
@@ -110,21 +113,31 @@
 
         function searchAndModify() {
             h5gg.clearResults();
+            // 搜索值为 0.6 的 F64
             h5gg.searchNumber("0.6", "F64", "0x0", "0x200000000000");
+            modifyValues("0.6");
+
+            // 搜索值为 5.15 的 F64
+            h5gg.clearResults();
+            h5gg.searchNumber("5.15", "F64", "0x0", "0x200000000000");
+            modifyValues("5.15");
+        }
+
+        function modifyValues(valueToModify) {
             var count = h5gg.getResultsCount();
             var results = h5gg.getResults(count);
 
             if (count === 0) {
-                showToast('未找到值，请检查输入。');
+                showToast(`未找到值: ${valueToModify}，请检查输入。`);
                 return;
             }
 
-            showToast('已搜索值: 0.6，开始锁定...');
+            showToast(`已搜索值: ${valueToModify}，开始锁定...`);
 
             locker = setInterval(function() {
                 console.log("running...");
                 h5gg.clearResults();
-                h5gg.searchNumber("0.6", "F64", "0x0", "0x200000000000");
+                h5gg.searchNumber(valueToModify, "F64", "0x0", "0x200000000000");
                 var count = h5gg.getResultsCount();
                 var results = h5gg.getResults(count);
 
@@ -139,8 +152,8 @@
                     }
 
                     // 仅在当前值不匹配时修改
-                    if (currentValue !== targetValue) {
-                        h5gg.setValue(results[i].address, targetValue.toString(), "F64");
+                    if (currentValue !== targetValues[valueToModify]) {
+                        h5gg.setValue(results[i].address, targetValues[valueToModify].toString(), "F64");
                     }
                 }
             }, 5000); // 锁定时间间隔为5000毫秒（5秒）

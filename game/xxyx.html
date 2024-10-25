@@ -88,8 +88,9 @@
     <div class="container">
         <h1>BB</h1>
         <div class="button-group">
-            <button onclick="searchAndModify('0.6', '50.06', 'F64')">修改 0.6 为 50.06</button>
-            <button onclick="searchAndModify('5.15', '35.15', 'F64')">修改 5.15 为 35.15</button>
+            <button onclick="searchAndModify(0.6, 50.06, 'F64')">修改 0.6 为 50.06</button>
+            <button onclick="searchAndModify(4, 25.04, 'F64')">修改 4 为 25.04</button>
+            <button onclick="searchAndModify(5.15, 35.15, 'F64')">修改 5.15 为 35.15</button>
             <button onclick="stopModifying()">停止修改</button>
         </div>
         <a class="return-link" href="https://ccccqiang.github.io/cq/">返回</a>
@@ -110,7 +111,7 @@
 
         function searchAndModify(originalValue, newValue, type) {
             h5gg.clearResults();
-            h5gg.searchNumber(originalValue, type, "0x0", "0x200000000000");
+            h5gg.searchNumber(originalValue.toString(), type, "0x0", "0x200000000000");
             var count = h5gg.getResultsCount();
             var results = h5gg.getResults(count);
 
@@ -124,18 +125,9 @@
             locker = setInterval(function() {
                 console.log("running...");
                 for (var i = 0; i < count; i++) {
-                    // 检查当前值是否是目标值，如果是，则跳过修改
-                    var currentValue = h5gg.getValue(results[i].address, type);
-                    if (currentValue !== newValue) {
-                        // 进行容错检查，确保新值在合理范围内
-                        if (Number(newValue) >= 0 && Number(newValue) <= 100) { // 假设合理范围是 0-100
-                            h5gg.setValue(results[i].address, newValue, type);
-                        } else {
-                            console.error('新值超出范围:', newValue);
-                        }
-                    }
+                    h5gg.setValue(results[i].address, newValue.toString(), type);
                 }
-            }, 5000); // 修改频率每 5 秒一次
+            }, 5000); // lock/freeze time interval (milliseconds)
         }
 
         function stopModifying() {

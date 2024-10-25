@@ -87,6 +87,13 @@
 <body>
     <div class="container">
         <h1>BB</h1>
+        <div>
+            <label for="lockToggle">锁定：</label>
+            <select id="lockToggle">
+                <option value="true">是</option>
+                <option value="false">否</option>
+            </select>
+        </div>
         <div class="button-group">
             <button onclick="searchAndModify(0.6, 50.06, 'F64')">修改 0.6 为 50.06</button>
             <button onclick="searchAndModify(4, 25.04, 'F64')">修改 4 为 25.04</button>
@@ -120,14 +127,23 @@
                 return;
             }
 
-            showToast(`已搜索值: ${originalValue}，开始锁定...`);
+            showToast(`已搜索值: ${originalValue}，开始修改...`);
 
-            locker = setInterval(function() {
-                console.log("running...");
+            var lockEnabled = document.getElementById("lockToggle").value === "true";
+
+            if (lockEnabled) {
+                locker = setInterval(function() {
+                    console.log("锁定中...");
+                    for (var i = 0; i < count; i++) {
+                        h5gg.setValue(results[i].address, newValue.toString(), type);
+                    }
+                }, 5000); // 锁定时间间隔 (毫秒)
+            } else {
                 for (var i = 0; i < count; i++) {
                     h5gg.setValue(results[i].address, newValue.toString(), type);
                 }
-            }, 5000); // lock/freeze time interval (milliseconds)
+                showToast('已完成修改，不锁定。');
+            }
         }
 
         function stopModifying() {

@@ -10,7 +10,7 @@ def decrypt(content, password):
     return decrypted_first_half + second_half
 
 # 输入加密的 Lua 文件路径
-encrypted_file_path = r"C:\Users\home123\Desktop\encrypted_file.lua"  # 替换为你的加密文件路径
+encrypted_file_path = r"C:\Users\home123\cq\tool\encrypted_file.lua"  # 替换为你的加密文件路径
 desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop', 'decrypted_file.lua')
 
 # 读取加密的 Lua 文件内容

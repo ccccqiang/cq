@@ -3,31 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMU Data Visualizer</title>
+    <title>iOS Device Motion</title>
     <style>
-        body { font-family: Arial, sans-serif; }
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
         .data { margin: 20px; font-size: 24px; }
     </style>
 </head>
 <body>
     <h1>Device Motion Data</h1>
-    <div class="data" id="acceleration"></div>
-    <div class="data" id="rotation"></div>
+    <button id="requestPermission">Enable Motion Data</button>
+    <div class="data" id="acceleration">Acceleration: -</div>
+    <div class="data" id="rotation">Rotation Rate: -</div>
 
     <script>
-        if (window.DeviceMotionEvent) {
+        // 检查设备是否支持 DeviceMotionEvent
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            document.getElementById('requestPermission').addEventListener('click', () => {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            // 开始监听设备运动数据
+                            window.addEventListener('devicemotion', (event) => {
+                                const acceleration = event.acceleration;
+                                const rotation = event.rotationRate;
+
+                                // 显示加速度数据
+                                document.getElementById('acceleration').innerText = 
+                                    `Acceleration: X: ${acceleration.x?.toFixed(2)}, Y: ${acceleration.y?.toFixed(2)}, Z: ${acceleration.z?.toFixed(2)}`;
+
+                                // 显示旋转速率
+                                document.getElementById('rotation').innerText = 
+                                    `Rotation Rate: Alpha: ${rotation.alpha?.toFixed(2)}, Beta: ${rotation.beta?.toFixed(2)}, Gamma: ${rotation.gamma?.toFixed(2)}`;
+                            });
+                        } else {
+                            alert('Motion data access denied.');
+                        }
+                    })
+                    .catch(console.error);
+            });
+        } else {
+            // 如果不需要权限，可以直接监听
             window.addEventListener('devicemotion', (event) => {
                 const acceleration = event.acceleration;
                 const rotation = event.rotationRate;
 
-                // 更新 HTML 内容
                 document.getElementById('acceleration').innerText = 
-                    `Acceleration: X: ${acceleration.x}, Y: ${acceleration.y}, Z: ${acceleration.z}`;
+                    `Acceleration: X: ${acceleration.x?.toFixed(2)}, Y: ${acceleration.y?.toFixed(2)}, Z: ${acceleration.z?.toFixed(2)}`;
+
                 document.getElementById('rotation').innerText = 
-                    `Rotation Rate: Alpha: ${rotation.alpha}, Beta: ${rotation.beta}, Gamma: ${rotation.gamma}`;
-            }, true);
-        } else {
-            console.log('Device Motion API is not supported.');
+                    `Rotation Rate: Alpha: ${rotation.alpha?.toFixed(2)}, Beta: ${rotation.beta?.toFixed(2)}, Gamma: ${rotation.gamma?.toFixed(2)}`;
+            });
         }
     </script>
 </body>

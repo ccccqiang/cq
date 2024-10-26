@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMU Data Visualizer</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .data { margin: 20px; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <h1>Device Motion Data</h1>
+    <div class="data" id="acceleration"></div>
+    <div class="data" id="rotation"></div>
+
+    <script>
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', (event) => {
+                const acceleration = event.acceleration;
+                const rotation = event.rotationRate;
+
+                // 更新 HTML 内容
+                document.getElementById('acceleration').innerText = 
+                    `Acceleration: X: ${acceleration.x}, Y: ${acceleration.y}, Z: ${acceleration.z}`;
+                document.getElementById('rotation').innerText = 
+                    `Rotation Rate: Alpha: ${rotation.alpha}, Beta: ${rotation.beta}, Gamma: ${rotation.gamma}`;
+            }, true);
+        } else {
+            console.log('Device Motion API is not supported.');
+        }
+    </script>
+</body>
+</html>

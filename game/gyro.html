@@ -3,89 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Capture with YOLO</title>
+    <title>Auto Aim with Device Motion</title>
     <style>
-        body { text-align: center; }
-        canvas { border: 1px solid black; }
-        #aim { position: absolute; width: 20px; height: 20px; background: blue; border-radius: 50%; }
+        body { font-family: Arial, sans-serif; text-align: center; overflow: hidden; }
+        .target, .aim {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .target { background-color: red; left: 50%; top: 30%; }
+        .aim { background-color: blue; left: 50%; top: 70%; }
+        #requestPermission { margin-top: 20px; font-size: 16px; padding: 10px; }
     </style>
 </head>
 <body>
-    <h1>Screen Capture with IMU Auto Aim</h1>
-    <button id="startCapture">Start Screen Capture</button>
-    <canvas id="videoCanvas" width="640" height="480"></canvas>
-    <div id="aim"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <h1>Device Motion Auto Aim</h1>
+    <button id="requestPermission">Enable Motion Data</button>
+    <div class="target" id="target"></div>
+    <div class="aim" id="aim"></div>
 
     <script>
-        let model;
-        const canvas = document.getElementById('videoCanvas');
-        const context = canvas.getContext('2d');
+        // 初始化目标和准星元素
         const aim = document.getElementById('aim');
+        const target = document.getElementById('target');
 
-        // 申请屏幕捕获权限
-        document.getElementById('startCapture').addEventListener('click', async () => {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            video.play();
-            video.addEventListener('loadeddata', () => {
-                detectObjects(video);
-            });
-        });
+        // 目标位置（可根据需求动态生成位置）
+        const targetPosition = { x: window.innerWidth / 2 - 25, y: window.innerHeight * 0.3 - 25 };
 
-        // 加载 YOLO 模型
-        async function loadModel() {
-            model = await cocoSsd.load();
-            console.log('Model loaded successfully!');
-        }
+        // 自动吸附的距离阈值
+        const aimThreshold = 80;
 
-        // 开始加载 YOLO 模型
-        loadModel();
+        // 灵敏度参数
+        let sensitivity = 2;
 
-        // 进行目标检测
-        async function detectObjects(video) {
-            while (true) {
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const predictions = await model.detect(canvas);
-                handleDetections(predictions);
-                await new Promise(requestAnimationFrame);
+        // 显示目标
+        target.style.left = `${targetPosition.x}px`;
+        target.style.top = `${targetPosition.y}px`;
+
+        // 监听按钮点击，获取运动权限
+        document.getElementById('requestPermission').addEventListener('click', () => {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            // 开始监听设备运动数据
+                            window.addEventListener('devicemotion', handleMotion);
+                        } else {
+                            alert('Motion data access denied.');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                alert('Device Motion API is not supported on this device.');
             }
-        }
-
-        // 处理检测结果
-        function handleDetections(predictions) {
-            predictions.forEach(prediction => {
-                // 绘制检测框
-                const [x, y, width, height] = prediction.bbox;
-                context.beginPath();
-                context.rect(x, y, width, height);
-                context.lineWidth = 2;
-                context.strokeStyle = 'red';
-                context.fillStyle = 'red';
-                context.stroke();
-                context.fillText(prediction.class, x, y > 10 ? y - 5 : 10);
-            });
-        }
-
-        // 处理 IMU 数据
-        window.addEventListener('devicemotion', (event) => {
-            const rotationRate = event.rotationRate;
-            updateAimPosition(rotationRate);
         });
 
-        // 更新准星位置
-        function updateAimPosition(rotationRate) {
-            const sensitivity = 10; // 调整灵敏度
+        // 处理设备运动数据
+        function handleMotion(event) {
+            const { rotationRate } = event;
+
+            // 使用设备的旋转速率（alpha, beta）来更新准星位置
+            const moveX = (rotationRate?.alpha || 0) * sensitivity;
+            const moveY = (rotationRate?.beta || 0) * sensitivity;
+
+            // 获取准星的当前坐标
             let aimX = parseFloat(aim.style.left || '50%');
-            let aimY = parseFloat(aim.style.top || '50%');
+            let aimY = parseFloat(aim.style.top || '70%');
 
-            aimX += (rotationRate.alpha || 0) * sensitivity;
-            aimY += (rotationRate.beta || 0) * sensitivity;
+            // 更新准星坐标
+            aimX += moveX;
+            aimY += moveY;
 
+            // 自动瞄准目标
+            const distanceToTarget = Math.hypot(aimX - targetPosition.x, aimY - targetPosition.y);
+
+            if (distanceToTarget < aimThreshold) {
+                // 当准星接近目标时，自动吸附到目标位置
+                aimX = targetPosition.x;
+                aimY = targetPosition.y;
+            }
+
+            // 设置新的准星位置
             aim.style.left = `${aimX}px`;
             aim.style.top = `${aimY}px`;
         }

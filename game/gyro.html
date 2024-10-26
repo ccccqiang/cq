@@ -3,56 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Device Motion</title>
+    <title>Auto Aim with Device Motion</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        .data { margin: 20px; font-size: 24px; }
+        body { font-family: Arial, sans-serif; text-align: center; overflow: hidden; }
+        .target, .aim {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .target { background-color: red; left: 50%; top: 30%; }
+        .aim { background-color: blue; left: 50%; top: 70%; }
+        #requestPermission { margin-top: 20px; font-size: 16px; padding: 10px; }
     </style>
 </head>
 <body>
-    <h1>Device Motion Data</h1>
+    <h1>Device Motion Auto Aim</h1>
     <button id="requestPermission">Enable Motion Data</button>
-    <div class="data" id="acceleration">Acceleration: -</div>
-    <div class="data" id="rotation">Rotation Rate: -</div>
+    <div class="target" id="target"></div>
+    <div class="aim" id="aim"></div>
 
     <script>
-        // 检查设备是否支持 DeviceMotionEvent
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            document.getElementById('requestPermission').addEventListener('click', () => {
+        // 初始化目标和准星元素
+        const aim = document.getElementById('aim');
+        const target = document.getElementById('target');
+
+        // 目标位置（可根据需求动态生成位置）
+        const targetPosition = { x: window.innerWidth / 2 - 25, y: window.innerHeight * 0.3 - 25 };
+
+        // 自动吸附的距离阈值
+        const aimThreshold = 30;
+
+        // 灵敏度参数
+        let sensitivity = 15;
+
+        // 显示目标
+        target.style.left = `${targetPosition.x}px`;
+        target.style.top = `${targetPosition.y}px`;
+
+        // 监听按钮点击，获取运动权限
+        document.getElementById('requestPermission').addEventListener('click', () => {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
                     .then(permissionState => {
                         if (permissionState === 'granted') {
                             // 开始监听设备运动数据
-                            window.addEventListener('devicemotion', (event) => {
-                                const acceleration = event.acceleration;
-                                const rotation = event.rotationRate;
-
-                                // 显示加速度数据
-                                document.getElementById('acceleration').innerText = 
-                                    `Acceleration: X: ${acceleration.x?.toFixed(2)}, Y: ${acceleration.y?.toFixed(2)}, Z: ${acceleration.z?.toFixed(2)}`;
-
-                                // 显示旋转速率
-                                document.getElementById('rotation').innerText = 
-                                    `Rotation Rate: Alpha: ${rotation.alpha?.toFixed(2)}, Beta: ${rotation.beta?.toFixed(2)}, Gamma: ${rotation.gamma?.toFixed(2)}`;
-                            });
+                            window.addEventListener('devicemotion', handleMotion);
                         } else {
                             alert('Motion data access denied.');
                         }
                     })
                     .catch(console.error);
-            });
-        } else {
-            // 如果不需要权限，可以直接监听
-            window.addEventListener('devicemotion', (event) => {
-                const acceleration = event.acceleration;
-                const rotation = event.rotationRate;
+            } else {
+                alert('Device Motion API is not supported on this device.');
+            }
+        });
 
-                document.getElementById('acceleration').innerText = 
-                    `Acceleration: X: ${acceleration.x?.toFixed(2)}, Y: ${acceleration.y?.toFixed(2)}, Z: ${acceleration.z?.toFixed(2)}`;
+        // 处理设备运动数据
+        function handleMotion(event) {
+            const { rotationRate } = event;
 
-                document.getElementById('rotation').innerText = 
-                    `Rotation Rate: Alpha: ${rotation.alpha?.toFixed(2)}, Beta: ${rotation.beta?.toFixed(2)}, Gamma: ${rotation.gamma?.toFixed(2)}`;
-            });
+            // 使用设备的旋转速率（alpha, beta）来更新准星位置
+            const moveX = (rotationRate?.alpha || 0) * sensitivity;
+            const moveY = (rotationRate?.beta || 0) * sensitivity;
+
+            // 获取准星的当前坐标
+            let aimX = parseFloat(aim.style.left || '50%');
+            let aimY = parseFloat(aim.style.top || '70%');
+
+            // 更新准星坐标
+            aimX += moveX;
+            aimY += moveY;
+
+            // 自动瞄准目标
+            const distanceToTarget = Math.hypot(aimX - targetPosition.x, aimY - targetPosition.y);
+
+            if (distanceToTarget < aimThreshold) {
+                // 当准星接近目标时，自动吸附到目标位置
+                aimX = targetPosition.x;
+                aimY = targetPosition.y;
+            }
+
+            // 设置新的准星位置
+            aim.style.left = `${aimX}px`;
+            aim.style.top = `${aimY}px`;
         }
     </script>
 </body>

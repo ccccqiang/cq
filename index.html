@@ -30,6 +30,7 @@
         }
 
         .floating-window {
+            display: none; /* 初始隐藏 */
             position: fixed;
             top: 50%;
             left: 50%;
@@ -43,6 +44,96 @@
             z-index: 1000;
             overflow: auto;
             max-height: 80vh;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none; /* 隐藏默认 */
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+            animation: fadeIn 0.3s; /* 添加渐显动画 */
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.3s; /* 添加滑动动画 */
+            text-align: center; /* 文字居中 */
+        }
+
+        @keyframes slideDown {
+            from {transform: translateY(-50%);}
+            to {transform: translateY(0);}
+        }
+
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border 0.3s; /* 添加边框过渡 */
+        }
+
+        input[type="password"]:focus {
+            border-color: var(--secondary-color);
+            outline: none; /* 去掉默认的外边框 */
+        }
+
+        button {
+            padding: 10px 15px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s, transform 0.2s; /* 添加按钮过渡 */
+        }
+
+        button:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05); /* 添加按钮放大效果 */
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #errorMessage {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+            color: red; /* 显示错误信息 */
         }
 
         h1 {
@@ -166,6 +257,16 @@
     </style>
 </head>
 <body>
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('passwordModal').style.display='none'">&times;</span>
+            <h2>Enter Password</h2>
+            <input type="password" id="passwordInput" placeholder="Password">
+            <button onclick="checkPassword()">Submit</button>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
     <div class="floating-window">
         <h1>Welcome to My Homepage</h1>
         <nav>
@@ -228,7 +329,7 @@
                         <li>Improved accuracy</li>
                         <li>Faster response time</li>
                         <li>To make changes, please run the decryption file. The link is
-<a href="https://ccccqiang.github.io/cq/tool/jiemi.py">@ccccqiang</a></li>
+                        <a href="https://ccccqiang.github.io/cq/tool/jiemi.py">@ccccqiang</a></li>
                     </ul>
                     <p>Click the link below to view the project:</p>
                     <p><a class="project-link" href="https://ccccqiang.github.io/cq/tool/encrypted_file.lua" target="_blank" aria-label="View CS2 Logitech Macro">CS2 Logitech Macro</a></p>
@@ -250,6 +351,23 @@
                 element.style.display = 'none';
             }
         }
+
+        function checkPassword() {
+            const passwordInput = document.getElementById('passwordInput').value;
+            const errorMessage = document.getElementById('errorMessage');
+            if (passwordInput === 'cq') { // 替换为你的密码
+                document.getElementById('passwordModal').style.display = 'none';
+                document.querySelector('.floating-window').style.display = 'block'; // 显示内容
+                errorMessage.textContent = ''; // 清除错误信息
+            } else {
+                errorMessage.textContent = 'Incorrect password. Please try again.';
+            }
+        }
+
+        // 打开密码模态框
+        window.onload = function() {
+            document.getElementById('passwordModal').style.display = 'block';
+        };
     </script>
 </body>
 </html>

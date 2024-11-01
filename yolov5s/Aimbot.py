@@ -50,8 +50,8 @@ def convert_to_bbs(results, classes):
         if CONFIDENCE_THRESHOLD is not None and confidence > CONFIDENCE_THRESHOLD and class_id in classes:
             bbox = [x1, y1, x2, y2]  # 这里假设你需要的是 [x1, y1, x2, y2]
             bbs.append((bbox, confidence, class_id))
+            print(f"[DEBUG] Detected bbox: {bbox}, Confidence: {confidence}, Class ID: {class_id}")
     return bbs
-
 
 def mouse_move(driver, target_x, target_y):
     mouse = pynput.mouse.Controller()
@@ -63,15 +63,17 @@ def mouse_move(driver, target_x, target_y):
         next_x = pid_x(mouse.position[0])
         next_y = pid_y(mouse.position[1])
         driver.moveR(int(round(next_x)), int(round(next_y)), False)
+        print(f"[DEBUG] Moving mouse to: ({next_x}, {next_y})")
 
 def display_preview(frame, bbs):
     frame = np.transpose(frame, (1, 2, 0))  # 将形状转换为 (320, 320, 3)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # 转换为 BGR 格式
     for bbox, confidence, class_id in bbs:
-        x1, y1, x2, y2 = map(int, bbox)  # 直接解包为 x1, y1, x2, y2
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)  # 画矩形框
+        x1, y1, x2, y2 = map(int, bbox)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
         cv2.putText(frame, f'ID: {class_id}, Conf: {confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     cv2.imshow('Preview', frame)
-
+    print(f"[DEBUG] Number of bounding boxes: {len(bbs)}")
 
 def main():
     driver = ctypes.CDLL(f'./logitech.driver.dll')
@@ -103,13 +105,9 @@ def main():
             img = np.expand_dims(img, axis=0)  # 添加批次维度
 
             # 使用ONNX模型进行推理
-            # ort_inputs = {ort_session.get_inputs()[0].name: img}
-            # results = ort_session.run(None, ort_inputs)
             ort_inputs = {ort_session.get_inputs()[0].name: img}
             results = ort_session.run(None, ort_inputs)
 
-            # 打印结果以查看其结构
-            # print("Results:", results)
             bbs = convert_to_bbs(results[0], classes)
             trackers = deepsort.update_tracks(bbs, frame=img[0])
             largest_bbox = None

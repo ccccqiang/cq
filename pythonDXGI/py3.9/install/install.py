@@ -15,7 +15,7 @@ def main():
 
     # 安装 PyTorch
     print("Installing PyTorch...")
-    install("torch==1.10.0+cu116 torchvision==0.11.0+cu116 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html")
+    install("torch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html")
 
     # 安装 ONNX Runtime
     print("Installing ONNX Runtime...")

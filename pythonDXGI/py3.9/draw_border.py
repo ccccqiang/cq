@@ -22,36 +22,26 @@ providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if ort.get_device(
 onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 
-# 定义屏幕捕获区域（根据需要自定义区域）
-g = DXGI.capture(0, 0, 320, 320)  # 从(0,0)到(640,640)区域进行捕获
+# 定义屏幕捕获区域
+screen_width = 1920  # 设置为你的屏幕宽度
+screen_height = 1080  # 设置为你的屏幕高度
+capture_width = 320
+capture_height = 320
+
+# 捕获全屏
+g = DXGI.capture(0, 0, screen_width, screen_height)
 
 # 定义计算FPS的变量
 prev_time = 0
-fps = 0
 
 def preprocess(img):
-    """
-    将捕获的图像预处理为适合ONNX模型的输入。
-    例如，调整大小、归一化、转为CHW格式等。
-    """
-    # 调整大小为 640x640，符合YOLOv5的输入要求
     img = cv2.resize(img, (320, 320))
-
-    # 转为float32并归一化到0-1之间
     img = img.astype(np.float32) / 255.0
-
-    # 交换维度为CHW格式
     img = np.transpose(img, (2, 0, 1))
-
-    # 扩展维度以匹配batch格式
     img = np.expand_dims(img, axis=0)
-
     return img
 
 def postprocess(output, img, conf_threshold=0.5, iou_threshold=0.4):
-    """
-    解析模型输出并绘制边界框。
-    """
     boxes = []
     scores = []
     class_ids = []
@@ -66,61 +56,70 @@ def postprocess(output, img, conf_threshold=0.5, iou_threshold=0.4):
                 scores.append(score)
                 class_ids.append(class_id)
 
-    # NMS (Non-Maximum Suppression)
     indices = cv2.dnn.NMSBoxes(boxes, scores, conf_threshold, iou_threshold)
 
-    # 处理空列表的情况
     if len(indices) > 0:
         for i in indices.flatten():
             box = boxes[i]
             x, y, w, h = box
             x, y, w, h = int(x), int(y), int(w), int(h)
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            label = f"{class_id}: {score:.2f}"
+            label = f"{class_ids[i]}: {scores[i]:.2f}"
             cv2.putText(img, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 while True:
-    start_time = time.time()
+    try:
+        # 捕获全屏
+        img = g.cap()
 
-    # 捕获屏幕
-    capture_start = time.time()
-    img = g.cap()
-    img = np.array(img)
-    capture_end = time.time()
+        # 检查捕获的图像是否有效
+        if img is None or img.size == 0:
+            print("Error: Captured image is None or has size 0.")
+            continue
 
-    # 将图像转换为BGR格式（OpenCV兼容）
-    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+        # 打印捕获的图像信息
+        print(f"Captured image shape: {img.shape}")
 
-    # 预处理图像
-    input_tensor = preprocess(img)
+        # 确保图像通道数为4（BGRA）
+        if img.shape[2] != 4:
+            print(f"Warning: Captured image does not have 4 channels. Found: {img.shape[2]} channels.")
 
-    # ONNX 推理
-    inference_start = time.time()
-    onnx_inputs = {ort_session.get_inputs()[0].name: input_tensor}
-    onnx_outputs = ort_session.run(None, onnx_inputs)
-    inference_end = time.time()
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)  # 转换为BGR格式
 
-    # 获取推理结果并绘制
-    output = onnx_outputs[0]
-    postprocess(output, img)
+        # 计算中心位置的左上角坐标
+        center_x = (screen_width - capture_width) // 2
+        center_y = (screen_height - capture_height) // 2
 
-    # 显示带检测的图像
-    cv2.imshow('YOLOv5n ONNX Detection', img)
+        # 从全屏图像中提取中心320x320区域
+        img_cropped = img[center_y:center_y + capture_height, center_x:center_x + capture_width]
 
-    # 计算 FPS
-    current_time = time.time()
-    fps = 1 / (current_time - prev_time)
-    prev_time = current_time
+        # 预处理图像
+        input_tensor = preprocess(img_cropped)
 
-    # 打印时间信息
-    capture_time = (capture_end - capture_start) * 1000  # 转换为毫秒
-    inference_time = (inference_end - inference_start) * 1000  # 转换为毫秒
-    total_time = (time.time() - start_time) * 1000  # 每帧的总时间
+        # ONNX 推理
+        onnx_inputs = {ort_session.get_inputs()[0].name: input_tensor}
+        onnx_outputs = ort_session.run(None, onnx_inputs)
 
-    print(f"FPS: {fps:.2f}, Capture Time: {capture_time:.2f} ms, Inference Time: {inference_time:.2f} ms, Total Time: {total_time:.2f} ms")
+        # 获取推理结果并绘制
+        output = onnx_outputs[0]
+        postprocess(output, img_cropped)
 
-    # 按'q'键退出
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+        # 显示带检测的图像
+        cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
+
+        # 计算 FPS
+        current_time = time.time()
+        fps = 1 / (current_time - prev_time)
+        prev_time = current_time
+
+        print(f"FPS: {fps:.2f}")
+
+        # 按'q'键退出
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
         break
 
 # 清理资源

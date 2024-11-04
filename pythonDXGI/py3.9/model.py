@@ -17,12 +17,13 @@ stop = windll.kernel32.Sleep
 # 导入 DXGI 屏幕捕获库
 import DXGI
 
-# 加载 ONNX 模型
-onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
-ort_session = ort.InferenceSession(onnx_model_path)
+# 检查CUDA是否可用并设置执行提供者
+providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if ort.get_device() == 'CUDA' else ['CPUExecutionProvider']
+onnx_model_path = r"C:\Users\home123\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
+ort_session = ort.InferenceSession(onnx_model_path, providers=providers)
 
 # 定义屏幕捕获区域（根据需要自定义区域）
-g = DXGI.capture(0, 0, 320, 320)  # 从(0,0)到(640,640)区域进行捕获
+g = DXGI.capture(0, 0, 320, 320)  # 从(0,0)到(320,320)区域进行捕获
 
 # 定义计算FPS的变量
 prev_time = 0
@@ -33,7 +34,7 @@ def preprocess(img):
     将捕获的图像预处理为适合ONNX模型的输入。
     例如，调整大小、归一化、转为CHW格式等。
     """
-    # 调整大小为 640x640，符合YOLOv5的输入要求
+    # 调整大小为 320x320，符合YOLOv5的输入要求
     img = cv2.resize(img, (320, 320))
 
     # 转为float32并归一化到0-1之间

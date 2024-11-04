@@ -11,11 +11,11 @@ def main():
 
     # 安装 TensorFlow
     print("Installing TensorFlow...")
-    install("tensorflow==2.9.0")
+    install("tensorflow==2.7")
 
     # 安装 PyTorch
     print("Installing PyTorch...")
-    install("torch==1.13.0+cu117 torchvision==0.14.0+cu117 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu117")
+    install("torch==1.10.0+cu116 torchvision==0.11.0+cu116 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html")
 
     # 安装 ONNX Runtime
     print("Installing ONNX Runtime...")

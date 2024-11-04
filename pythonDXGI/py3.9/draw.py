@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 from ctypes import windll
-from mouse_controller import move_mouse_to_head
 
 # 确保所需的DLL在路径中
 sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
@@ -24,8 +23,8 @@ onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 
 # 定义屏幕捕获区域
-screen_width = 1920
-screen_height = 1080
+screen_width = 1920  # 设置为你的屏幕宽度
+screen_height = 1080  # 设置为你的屏幕高度
 capture_width = 320
 capture_height = 320
 
@@ -59,26 +58,20 @@ def postprocess(output, img, conf_threshold=0.5, iou_threshold=0.4):
 
     indices = cv2.dnn.NMSBoxes(boxes, scores, conf_threshold, iou_threshold)
 
-    detected_boxes = []  # 存储检测到的坐标和类 ID
-
     if len(indices) > 0:
         for i in indices.flatten():
             box = boxes[i]
             x, y, w, h = box
             x, y, w, h = int(x), int(y), int(w), int(h)
-            class_id = class_ids[i]
-
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            label = f"{class_id}: {scores[i]:.2f}"
+            label = f"{class_ids[i]}: {scores[i]:.2f}"
             cv2.putText(img, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            detected_boxes.append((x + w // 2, y + h // 2, class_id))  # 中心点坐标和类 ID
-
-    return detected_boxes  # 返回检测到的坐标和类 ID
 
 while True:
     try:
         # 捕获全屏
         img = g.cap()
+
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)  # 转换为BGR格式
 
         # 计算中心位置的左上角坐标
@@ -97,10 +90,7 @@ while True:
 
         # 获取推理结果并绘制
         output = onnx_outputs[0]
-        detected_boxes = postprocess(output, img_cropped)
-
-        # 移动鼠标到检测到的头部对象
-        move_mouse_to_head([(center_x + x, center_y + y, class_id) for (x, y, class_id) in detected_boxes])
+        postprocess(output, img_cropped)
 
         # 显示带检测的图像
         cv2.imshow('YOLOv5n ONNX Detection', img_cropped)

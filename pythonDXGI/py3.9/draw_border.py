@@ -18,6 +18,7 @@ stop = windll.kernel32.Sleep
 import DXGI
 
 # 加载 ONNX 模型
+providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if ort.get_device() == 'CUDA' else ['CPUExecutionProvider']
 onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 

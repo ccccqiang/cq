@@ -1,15 +1,8 @@
-
-### 安装库的 Python 脚本
-
-# 你可以将以下内容保存为一个名为 `install_dependencies.py` 的文件：
-#
-# ```python
-import os
 import subprocess
 import sys
 
 def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    subprocess.check_call([sys.executable, "-m", "pip", "install"] + package.split())
 
 def main():
     # 确保 pip 是最新版本

@@ -48,3 +48,12 @@
    ```bash
    python -m venv myenv
    myenv\Scripts\activate  # Windows 上激活虚拟环境
+
+### 4. 模型说明
+
+- ID 分类：
+  - 0: CT Body
+  - 1: CT Head
+  - 2: T Body
+  - 3: T Head
+

@@ -5,17 +5,22 @@ import cv2
 import numpy as np
 from ctypes import windll
 
-# 添加所需的 DLL
-sys.path.append(r'/pythonDXGI')
-os.add_dll_directory(r'/pythonDXGI\DXGI.pyd')
+try:
+    # 添加所需的 DLL
+    sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
+    os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
 
-# 初始化Windows定时器
-windll.winmm.timeBeginPeriod(1)
-stop = windll.kernel32.Sleep
+    # 初始化Windows定时器
+    windll.winmm.timeBeginPeriod(1)
+    stop = windll.kernel32.Sleep
 
-# 导入DXGI和YOLO
-import DXGI
-import torch
+    # 导入DXGI和YOLO
+    import DXGI
+    import torch
+
+except ImportError as e:
+    print(f"导入库时发生错误: {e}")
+    sys.exit(1)
 
 # 设置屏幕捕捉区域 (左上角到右下角)
 g = DXGI.capture(0, 0, 640, 640)

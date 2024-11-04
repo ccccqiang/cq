@@ -7,8 +7,8 @@ import onnxruntime as ort
 from ctypes import windll
 
 # 确保所需的DLL在路径中
-sys.path.append(r'/pythonDXGI/py3.9')
-os.add_dll_directory(r'/pythonDXGI/py3.9/DXGI.pyd')
+sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
 
 # Windows时间优化
 windll.winmm.timeBeginPeriod(1)
@@ -18,11 +18,11 @@ stop = windll.kernel32.Sleep
 import DXGI
 
 # 加载 ONNX 模型
-onnx_model_path = r'C:\Users\home123\Downloads\valorant-11.onnx'
+onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 
 # 定义屏幕捕获区域（根据需要自定义区域）
-g = DXGI.capture(0, 0, 120, 120)  # 从(0,0)到(640,640)区域进行捕获
+g = DXGI.capture(0, 0, 320, 320)  # 从(0,0)到(640,640)区域进行捕获
 
 # 定义计算FPS的变量
 prev_time = 0
@@ -34,7 +34,7 @@ def preprocess(img):
     例如，调整大小、归一化、转为CHW格式等。
     """
     # 调整大小为 640x640，符合YOLOv5的输入要求
-    img = cv2.resize(img, (640, 640))
+    img = cv2.resize(img, (320, 320))
 
     # 转为float32并归一化到0-1之间
     img = img.astype(np.float32) / 255.0

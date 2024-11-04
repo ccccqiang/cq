@@ -72,18 +72,6 @@ while True:
         # 捕获全屏
         img = g.cap()
 
-        # 检查捕获的图像是否有效
-        if img is None or img.size == 0:
-            print("Error: Captured image is None or has size 0.")
-            continue
-
-        # 打印捕获的图像信息
-        print(f"Captured image shape: {img.shape}")
-
-        # 确保图像通道数为4（BGRA）
-        if img.shape[2] != 4:
-            print(f"Warning: Captured image does not have 4 channels. Found: {img.shape[2]} channels.")
-
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)  # 转换为BGR格式
 
         # 计算中心位置的左上角坐标

@@ -21,7 +21,6 @@ import DXGI
 # 创建ONNX Runtime的会话选项
 sess_options = ort.SessionOptions()
 
-
 # 检查是否有可用的CUDA设备
 if torch.cuda.is_available():
     providers = [
@@ -84,11 +83,12 @@ def postprocess(output, img, conf_threshold=0.5, iou_threshold=0.4):
             x, y, w, h = box
             x, y, w, h = int(x), int(y), int(w), int(h)
             class_id = class_ids[i]
+            confidence = scores[i]
 
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            label = f"{class_id}: {scores[i]:.2f}"
+            label = f"{class_id}: {confidence:.2f}"
             cv2.putText(img, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            detected_boxes.append((x + w // 2, y + h // 2, class_id))
+            detected_boxes.append((x + w // 2, y + h // 2, class_id, confidence))
 
     return detected_boxes
 
@@ -108,7 +108,10 @@ while True:
         output = onnx_outputs[0]
         detected_boxes = postprocess(output, img_cropped)
 
-        move_mouse_to_head([(center_x + x, center_y + y, class_id) for (x, y, class_id) in detected_boxes])
+        # 调整坐标以适应全屏
+        adjusted_boxes = [(center_x + x, center_y + y, class_id, confidence) for (x, y, class_id, confidence) in detected_boxes]
+
+        move_mouse_to_head(adjusted_boxes)
 
         cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
 

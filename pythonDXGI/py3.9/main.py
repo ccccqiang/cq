@@ -9,9 +9,8 @@ from ctypes import windll
 from mouse_controller import move_mouse_to_head
 
 # 确保所需的DLL在路径中
-sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
-
+sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
 # Windows时间优化
 windll.winmm.timeBeginPeriod(1)
 stop = windll.kernel32.Sleep
@@ -22,14 +21,20 @@ import DXGI
 # 创建ONNX Runtime的会话选项
 sess_options = ort.SessionOptions()
 
-# 设置CUDA执行提供者的设备ID
-providers = [
-    ("CUDAExecutionProvider", {
-        "device_id": torch.cuda.current_device()
-    })
-]
 
-onnx_model_path = r"C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
+# 检查是否有可用的CUDA设备
+if torch.cuda.is_available():
+    providers = [
+        ("CUDAExecutionProvider", {
+            "device_id": torch.cuda.current_device()
+        })
+    ]
+else:
+    providers = [
+        ("CPUExecutionProvider", {})
+    ]
+
+onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path, sess_options=sess_options, providers=providers)
 
 # 打印正在使用的执行提供者

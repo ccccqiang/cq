@@ -7,6 +7,7 @@ import onnxruntime as ort
 import torch
 from ctypes import windll
 from mouse_controller import move_mouse_to_head
+import ctypes
 
 # 添加DLL路径
 sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
@@ -101,7 +102,8 @@ while True:
                           detected_boxes]
 
         # 调用鼠标移动函数
-        move_mouse_to_head(adjusted_boxes)
+        driver = ctypes.CDLL(r'C:\Users\home123\cq\LGMC\logitech.driver.dll')  # 加载驱动
+        move_mouse_to_head(adjusted_boxes, driver)
 
         # 显示检测结果
         cv2.imshow('YOLOv5n ONNX Detection', img_cropped)

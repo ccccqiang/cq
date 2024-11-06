@@ -4,7 +4,7 @@ import pynput
 import winsound
 
 try:
-    root = r"C:\Users\home123\cq\LGMC\logitech.driver.dll"
+    root = r"C:\Users\Administrator\PycharmProjects\cq\LGMC\logitech.driver.dll"
     print(root)
     driver = ctypes.CDLL(root)
     ok = driver.device_open() == 1  # 该驱动每个进程可打开一个实例

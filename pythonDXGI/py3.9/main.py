@@ -96,6 +96,7 @@ while True:
 
         # 后处理输出并绘制结果
         detected_boxes = postprocess(output, img_cropped)
+        print(detected_boxes)
 
         # 调整坐标以适应全屏
         adjusted_boxes = [(center_x + x, center_y + y, class_id, confidence) for (x, y, class_id, confidence) in

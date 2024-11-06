@@ -1,24 +1,81 @@
+import pyautogui
+import pynput
+import pyautogui
+from simple_pid import PID
 import ctypes
-import time
-
-# 加载 Logitech 驱动 DLL
-driver = ctypes.CDLL(r'C:\Users\home123\cq\LGMC\logitech.driver.dll')  # 替换为 Logitech 驱动 DLL 的实际路径
-
-# 定义鼠标移动函数，假设 Logitech DLL 提供 `MoveMouse` 函数
-def move_mouse(x, y):
-    try:
-        driver.MoveMouse(ctypes.c_int(x), ctypes.c_int(y))  # 调用 Logitech 驱动中的鼠标移动函数
-    except AttributeError:
-        print("The Logitech driver does not contain the MoveMouse function.")
-
-def move_mouse_to_head(coordinates):
+def mouse_move(driver, target_x, target_y):
     """
-    移动鼠标到检测到的头部位置。
-    coordinates: list, 每个元素为 (x, y, class_id, confidence)
+    使用 PID 控制器平滑移动鼠标到目标坐标 (target_x, target_y)
     """
+    mouse = pynput.mouse.Controller()
+    pid_x = PID(0.0035, 0.005, 0.0007, setpoint=target_x)
+    pid_y = PID(0.0035, 0.005, 0.0007, setpoint=target_y)
+
+
+    while True:
+        # 检查是否已接近目标坐标
+        if abs(target_x - mouse.position[0]) < 3 and abs(target_y - mouse.position[1]) < 3:
+            break
+
+        # 使用 PID 控制器计算下一个位置
+        next_x, next_y = pid_x(mouse.position[0]), pid_y(mouse.position[1])
+
+        # 使用 driver 控制鼠标移动
+        driver.moveR(int(round(next_x)), int(round(next_y)), False)
+
+        # 使用 pyautogui 解决 pynput bug
+        pyautogui.position()  # 此处用来触发 pyautogui 修复问题
+def move_mouse_to_head(coordinates,driver):
+    # 假设coordinates的格式为 (x, y, class_id, confidence)
+    # 仅移动到 CT Head (ID 1) 和 T Head (ID 3) 的坐标，并且置信度大于0.95
     head_coordinates = [(x, y) for (x, y, class_id, confidence) in coordinates if class_id in [1, 3] and confidence > 0.95]
 
     for (x, y) in head_coordinates:
-        # 移动鼠标到指定位置
-        move_mouse(x, y)
-        time.sleep(0.1)  # 短暂延迟以使移动流畅
+        mouse_move(driver,x, y,)  # 移动鼠标
+
+
+# from simple_pid import PID
+# import pynput
+# import pyautogui
+# import ctypes
+#
+#
+# def mouse_move(driver, target_x, target_y):
+#     """
+#     使用 PID 控制器平滑移动鼠标到目标坐标 (target_x, target_y)
+#     """
+#     mouse = pynput.mouse.Controller()
+#     pid_x = PID(0.0035, 0.005, 0.0007, setpoint=target_x)
+#     pid_y = PID(0.0035, 0.005, 0.0007, setpoint=target_y)
+#
+#     while True:
+#         # 检查是否已接近目标坐标
+#         if abs(target_x - mouse.position[0]) < 3 and abs(target_y - mouse.position[1]) < 3:
+#             break
+#
+#         # 使用 PID 控制器计算下一个位置
+#         next_x, next_y = pid_x(mouse.position[0]), pid_y(mouse.position[1])
+#
+#         # 使用 driver 控制鼠标移动
+#         driver.moveR(int(round(next_x)), int(round(next_y)), False)
+#
+#         # 使用 pyautogui 解决 pynput bug
+#         pyautogui.position()  # 此处用来触发 pyautogui 修复问题
+#
+#
+# def move_mouse_to_head(coordinates, driver):
+#     """
+#     根据坐标列表移动鼠标到指定位置，只移动到 CT Head (ID 1) 和 T Head (ID 3) 的坐标，且置信度大于 0.95
+#     """
+#     # 筛选出符合条件的坐标
+#     head_coordinates = [(x, y) for (x, y, class_id, confidence) in coordinates if
+#                         class_id in [1, 3] and confidence > 0.95]
+#
+#     if not head_coordinates:
+#         print("没有符合条件的坐标！",head_coordinates)
+#         return
+#
+#     # 移动鼠标到每个筛选出来的坐标
+#     for (x, y) in head_coordinates:
+#         print(f"正在移动鼠标到 ({x}, {y})")
+#         mouse_move(driver, x, y)

@@ -3,14 +3,16 @@ import pynput
 import pyautogui
 from simple_pid import PID
 import ctypes
+import time
+
+
 def mouse_move(driver, target_x, target_y):
     """
     使用 PID 控制器平滑移动鼠标到目标坐标 (target_x, target_y)
     """
     mouse = pynput.mouse.Controller()
-    pid_x = PID(0.0035, 0.005, 0.0007, setpoint=target_x)
-    pid_y = PID(0.0035, 0.005, 0.0007, setpoint=target_y)
-
+    pid_x = PID(0.035, 0.05, 0.007, setpoint=target_x)
+    pid_y = PID(0.035, 0.05, 0.007, setpoint=target_y)
 
     while True:
         # 检查是否已接近目标坐标
@@ -24,15 +26,25 @@ def mouse_move(driver, target_x, target_y):
         driver.moveR(int(round(next_x)), int(round(next_y)), False)
 
         # 使用 pyautogui 解决 pynput bug
-        pyautogui.position()  # 此处用来触发 pyautogui 修复问题
-def move_mouse_to_head(coordinates,driver):
+        pyautogui.position()
+
+        # 短暂延时，防止频繁计算导致过高的 CPU 占用
+        time.sleep(0.01)
+
+
+def move_mouse_to_head(coordinates, driver):
     # 假设coordinates的格式为 (x, y, class_id, confidence)
     # 仅移动到 CT Head (ID 1) 和 T Head (ID 3) 的坐标，并且置信度大于0.95
-    head_coordinates = [(x, y) for (x, y, class_id, confidence) in coordinates if class_id in [1, 3] and confidence > 0.95]
+    head_coordinates = [(x, y) for (x, y, class_id, confidence) in coordinates if
+                        class_id in [1, 3] and confidence > 0.95]
+
+    if not head_coordinates:
+        print("没有符合条件的坐标！", head_coordinates)
+        return
 
     for (x, y) in head_coordinates:
-        mouse_move(driver,x, y,)  # 移动鼠标
-
+        print(f"正在移动鼠标到 ({x}, {y})")
+        mouse_move(driver, x, y)
 
 # from simple_pid import PID
 # import pynput

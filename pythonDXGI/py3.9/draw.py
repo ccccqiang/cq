@@ -7,8 +7,8 @@ import onnxruntime as ort
 from ctypes import windll
 
 # 确保所需的DLL在路径中
-sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
+sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
 
 # Windows时间优化
 windll.winmm.timeBeginPeriod(1)
@@ -19,7 +19,7 @@ import DXGI
 
 # 加载 ONNX 模型
 providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if ort.get_device() == 'CUDA' else ['CPUExecutionProvider']
-onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
+onnx_model_path = r"C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 
 # 定义屏幕捕获区域

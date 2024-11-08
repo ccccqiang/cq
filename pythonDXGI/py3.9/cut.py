@@ -6,10 +6,10 @@ import numpy as np
 from ctypes import windll
 
 # 添加所需的 DLL
-sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
-# sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
-# os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
+# sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
+# os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
+sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
 
 # 初始化Windows定时器
 windll.winmm.timeBeginPeriod(1)
@@ -20,7 +20,7 @@ import DXGI
 # import torch
 
 # 设置屏幕捕捉区域 (左上角到右下角)
-g = DXGI.capture(0, 0, 640, 640)
+g = DXGI.capture(0, 0, 320, 320)
 
 # 计算帧数的辅助变量
 prev_time = time.time()
@@ -52,9 +52,9 @@ while True:
     print(f"Frame Time: {frame_time * 1000:.2f} ms, FPS: {fps:.2f}")
 
     # 显示捕获的图像
-    # cv2.imshow('Screen Capture', img)
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
+    cv2.imshow('Screen Capture', img)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 # 关闭所有窗口
 cv2.destroyAllWindows()

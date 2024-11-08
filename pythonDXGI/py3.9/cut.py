@@ -5,11 +5,11 @@ import cv2
 import numpy as np
 from ctypes import windll
 
-# # 添加所需的 DLL
-# sys.path.append(r'/pythonDXGI/py3.9')
-# os.add_dll_directory(r'/pythonDXGI/py3.9/DXGI.pyd')
-sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
+# 添加所需的 DLL
+sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
+# sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
+# os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
 
 # 初始化Windows定时器
 windll.winmm.timeBeginPeriod(1)

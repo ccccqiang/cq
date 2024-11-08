@@ -52,9 +52,9 @@ while True:
     print(f"Frame Time: {frame_time * 1000:.2f} ms, FPS: {fps:.2f}")
 
     # 显示捕获的图像
-    cv2.imshow('Screen Capture', img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # cv2.imshow('Screen Capture', img)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
 # 关闭所有窗口
 cv2.destroyAllWindows()

@@ -100,13 +100,13 @@ while True:
         # 调整坐标以适应全屏
         adjusted_boxes = [(center_x + x, center_y + y, class_id, confidence) for (x, y, class_id, confidence) in
                           detected_boxes]
-        print(adjusted_boxes)
+        # print(adjusted_boxes)
         # 调用鼠标移动函数
         driver = ctypes.CDLL(r'C:\Users\home123\cq\LGMC\logitech.driver.dll')  # 加载驱动
         move_mouse_to_head(adjusted_boxes, driver)
 
-        # # 显示检测结果
-        # cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
+        # 显示检测结果
+        cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
 
         # FPS 计算
         current_time = time.time()
@@ -114,8 +114,8 @@ while True:
         prev_time = current_time
         print(f"FPS: {fps:.2f}")
 
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     except Exception as e:
         print(f"An error occurred: {e}")

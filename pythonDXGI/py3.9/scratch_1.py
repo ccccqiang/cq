@@ -7,6 +7,7 @@ import subprocess
 onnx_model_path = r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\cs2.onnx'
 ort_session = onnxruntime.InferenceSession(onnx_model_path)
 
+
 # 定义YOLO推理函数
 def yolo_inference(frame):
     # 将BGR图像转换为RGB
@@ -26,6 +27,7 @@ def yolo_inference(frame):
 
     return detections
 
+
 # 通过ffplay捕获屏幕流
 ffplay_path = r"C:\Users\home123\Documents\screen-capture-record2dxgi演示\ffplay64.exe"
 command = [
@@ -41,15 +43,24 @@ command = [
 process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 # 捕获视频流（使用OpenCV）
-cap = cv2.VideoCapture('video=screen-capture-dxgi-qq35744025')  # 通过dshow捕获屏幕
+cap = cv2.VideoCapture('screen-capture-dxgi-qq35744025')  # 通过dshow捕获屏幕
+if not cap.isOpened():
+    print("Error: Could not open video capture.")
+    exit()
 
 while True:
     ret, frame = cap.read()
     if not ret:
+        print("Failed to capture frame")
         break
 
     # 对帧进行YOLO推理
     detections = yolo_inference(frame)
+
+    if detections.size == 0:
+        print("No detections found.")
+    else:
+        print(f"Detections: {detections.shape[0]} objects detected.")
 
     # 假设detections包含bounding boxes: [x1, y1, x2, y2, confidence, class_id]
     for detection in detections:
@@ -66,5 +77,6 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+# 释放资源
 cap.release()
 cv2.destroyAllWindows()

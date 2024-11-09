@@ -36,7 +36,7 @@ def move_mouse_to_head(coordinates, driver):
     # 假设coordinates的格式为 (x, y, class_id, confidence)
     # 仅移动到 CT Head (ID 1) 和 T Head (ID 3) 的坐标，并且置信度大于0.95
     head_coordinates = [(x, y) for (x, y, class_id, confidence) in coordinates if
-                        class_id in [1, 3] and confidence > 0.95]
+                        class_id in [1] and confidence > 0.95]
 
     if not head_coordinates:
         print("没有符合条件的坐标！", head_coordinates)

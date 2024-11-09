@@ -11,8 +11,8 @@ def mouse_move(driver, target_x, target_y):
     使用 PID 控制器平滑移动鼠标到目标坐标 (target_x, target_y)
     """
     mouse = pynput.mouse.Controller()
-    pid_x = PID(0.035, 0.05, 0.007, setpoint=target_x)
-    pid_y = PID(0.035, 0.05, 0.007, setpoint=target_y)
+    pid_x = PID(0.065, 0.1, 0.01, setpoint=target_x)
+    pid_y = PID(0.065, 0.1, 0.01, setpoint=target_y)
 
     while True:
         # 检查是否已接近目标坐标

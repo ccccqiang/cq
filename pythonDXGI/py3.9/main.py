@@ -10,8 +10,8 @@ from mouse_controller import move_mouse_to_head
 import ctypes
 
 # 添加DLL路径
-sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
+sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
 
 # Windows 时间优化
 windll.winmm.timeBeginPeriod(1)
@@ -28,7 +28,7 @@ providers = [("CUDAExecutionProvider", {"device_id": torch.cuda.current_device()
     ("CPUExecutionProvider", {})]
 
 # 加载 ONNX 模型
-onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
+onnx_model_path = r"C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path, sess_options=sess_options, providers=providers)
 
 # 输出使用的执行提供者
@@ -102,11 +102,11 @@ while True:
                           detected_boxes]
         # print(adjusted_boxes)
         # 调用鼠标移动函数
-        driver = ctypes.CDLL(r'C:\Users\home123\cq\LGMC\logitech.driver.dll')  # 加载驱动
+        driver = ctypes.CDLL(r'C:\Users\Administrator\PycharmProjects\cq\LGMC\logitech.driver.dll')  # 加载驱动
         move_mouse_to_head(adjusted_boxes, driver)
 
-        # 显示检测结果
-        cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
+        # # 显示检测结果
+        # cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
 
         # FPS 计算
         current_time = time.time()
@@ -114,8 +114,8 @@ while True:
         prev_time = current_time
         print(f"FPS: {fps:.2f}")
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
     except Exception as e:
         print(f"An error occurred: {e}")

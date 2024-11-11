@@ -133,7 +133,7 @@ for i in range(len(config_list)):
     index2 = config_list[i][0].find("#")
     last_configs_list.append(float(config_list[i][0][index1 + 1:index2]))
     configs_dict[i + 1] = float(config_list[i][0][index1 + 1:index2])
-
+print(f"配置写入：{configs_dict}")
 y_correction_factor = configs_dict[1]
 x_correction_factor = 0
 screen_x, screen_y = configs_dict[2], configs_dict[3]
@@ -177,7 +177,7 @@ def find_target(
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference

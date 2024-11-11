@@ -222,8 +222,18 @@ def find_target():
             print('\033[0;33;40m' + f"target-X = {target_xywh_x}  target—Y = {target_xywh_y}" + '\033[0m')
             if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
 
-                aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON) \
-                            or win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+                if configs_dict[12] == 3:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON) \
+                                or win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+                elif configs_dict[12] == 2:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON)
+
+                elif configs_dict[12] == 1:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+
+                else:
+                    print("请填入正确的鼠标瞄准模式数字 1 或 2 或 3, Please fill the correct aim mod number 1 or 2 or 3")
+                    break
 
                 if aim_mouse:
                     final_x = target_xywh_x - screen_x_center

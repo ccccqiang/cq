@@ -214,7 +214,7 @@ def find_target(
         current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
         if current_f1_state and not last_f1_state:
             pause_aim = not pause_aim
-            print(f"自瞄 {'暂停' if pause_aim else '恢复'}")
+            print(f"Aim {'Stop' if pause_aim else 'Start'}")
 
         last_f1_state = current_f1_state
 

@@ -15,9 +15,92 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import grab_screen
 from PID import PID
 from FPS import FPS  # 导入FPS类
-
+import ctypes
 # 初始化FPS计数器
 fps = FPS()
+# Load Logitech Driver DLL globally
+try:
+    driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
+    ok = driver.device_open() == 1  # The driver can only be opened once per process
+    if not ok:
+        print('Error, GHUB or LGS driver not found')
+except FileNotFoundError:
+    print(f'Error, DLL file not found')
+
+class Logitech:
+
+    class mouse:
+        """
+        code: 1: Left button, 2: Middle button, 3: Right button
+        """
+
+        @staticmethod
+        def press(code):
+            if not ok:
+                return
+            driver.mouse_down(code)
+
+        @staticmethod
+        def release(code):
+            if not ok:
+                return
+            driver.mouse_up(code)
+
+        @staticmethod
+        def click(code):
+            if not ok:
+                return
+            driver.mouse_down(code)
+            driver.mouse_up(code)
+
+        @staticmethod
+        def scroll(a):
+            """
+            a: Scroll step, unclear meaning
+            """
+            if not ok:
+                return
+            driver.scroll(a)
+
+        @staticmethod
+        def move(x, y):
+            """
+            Relative movement. For absolute movement, you need to use pywin32's win32gui to calculate positions.
+            pip install pywin32 -i https://pypi.tuna.tsinghua.edu.cn/simple
+            x: Horizontal movement distance and direction, positive to the right, negative to the left
+            y: Vertical movement distance and direction
+            """
+            if not ok:
+                return
+            if x == 0 and y == 0:
+                return
+            driver.moveR(x, y, True)  # Relative movement
+
+    class keyboard:
+        """
+        Keyboard key functions use the corresponding key code.
+        code: 'a'-'z': A-Z, '0'-'9': 0-9, other keys are not specified
+        """
+
+        @staticmethod
+        def press(code):
+            if not ok:
+                return
+            driver.key_down(code)
+
+        @staticmethod
+        def release(code):
+            if not ok:
+                return
+            driver.key_up(code)
+
+        @staticmethod
+        def click(code):
+            if not ok:
+                return
+            driver.key_down(code)
+            driver.key_up(code)
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -97,14 +180,14 @@ time.sleep(2)
 
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
-        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / 'apex_best_2.pt',  # model.pt path(s)
+        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
@@ -187,14 +270,15 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    # 鼠标计算相对移动距离 (calculate mouse relative move distance)
                     final_x = target_xywh_x - screen_x_center
                     final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
-                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
 
+                    # Move the mouse
+                    Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
                     """ 单片机执行位移，每个人位移的实现不一样，位移坐标你都拿到了，动鼠标的事情自己考虑
                     since you have gotten the x y movement data,choose your own way to move the mouse to aim enemy"""
 

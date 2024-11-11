@@ -3,11 +3,9 @@ import sys
 import time
 from pathlib import Path
 import numpy as np
-# import serial
 import torch
 import win32api
 import win32con
-
 from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
@@ -16,8 +14,10 @@ from grabscreen import grab_screen
 from PID import PID
 from FPS import FPS  # 导入FPS类
 import ctypes
+
 # 初始化FPS计数器
 fps = FPS()
+
 # Load Logitech Driver DLL globally
 try:
     driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
@@ -136,13 +136,7 @@ for i in range(len(config_list)):
 
 print(f"配置写入：{configs_dict}")
 
-# ser = serial.Serial(f'{com_text}', 115200)
-# ser.write('import km\r\n'.encode('utf-8'))
-
 time.sleep(0.1)
-
-# print('kmbox 成功导入模块:', str(ser.read(ser.inWaiting()), 'utf-8'))
-
 
 y_correction_factor = configs_dict[1]  # 截图位置修正， 值越大截图窗口向上
 x_correction_factor = 0  # 截图位置修正， 值越大截图窗口向右移动
@@ -177,6 +171,9 @@ aim_y_up = int(screen_y_center - aim_y / 2 - y_correction_factor)  # 自瞄上�
 aim_y_down = int(screen_y_center + aim_y / 2 - y_correction_factor)
 time.sleep(2)
 
+# 暂停自瞄标志
+pause_aim = False
+last_f1_state = False
 
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
@@ -193,6 +190,8 @@ def find_target(
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
+    global pause_aim, last_f1_state
+
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -211,6 +210,18 @@ def find_target(
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
     print(f"imgz = {imgsz}")
     while True:
+        # 检查 F1 键的状态
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        if current_f1_state and not last_f1_state:
+            pause_aim = not pause_aim
+            print(f"自瞄 {'暂停' if pause_aim else '恢复'}")
+
+        last_f1_state = current_f1_state
+
+        if pause_aim:
+            time.sleep(0.1)
+            continue
+
         img0 = grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
@@ -232,20 +243,15 @@ def find_target(
         target_distance_list = []
         target_xywh_list = []
         if len(det):
-            # print('move 回码：', str(ser.read(ser.inWaiting()), 'utf-8'))
-
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
 
             for *xyxy, conf, cls in reversed(det):
                 xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4))).view(-1).tolist()  # 不使用归一化，返回坐标图片
 
-                # print('\033[0;40;40m' + f'   xywh = {xywh}   \n' + '\033[0m')
-
                 target_xywh_list.append(xywh)
                 target_distance = abs(edge_x + xywh[0] - screen_x_center)
 
                 target_distance_list.append(target_distance)
-            # print(f"target_distance_list= {target_distance_list}")
             min_index = target_distance_list.index(min(target_distance_list))
             target_xywh = target_xywh_list[min_index]
 
@@ -279,13 +285,6 @@ def find_target(
                     # Move the mouse
                     Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-                    """ 单片机执行位移，每个人位移的实现不一样，位移坐标你都拿到了，动鼠标的事情自己考虑
-                    since you have gotten the x y movement data,choose your own way to move the mouse to aim enemy"""
-
-                    # ser.write(f'km.move({pid_x},{pid_y})\r\n'.encode('utf-8'))
-
-
-
 
         else:
             print('\033[0;31;40m' + f'  no target   ' + '\033[0m')

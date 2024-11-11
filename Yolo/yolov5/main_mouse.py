@@ -167,7 +167,9 @@ aim_y = configs_dict[14]
 aim_y_up = int(screen_y_center - aim_y / 2 - y_correction_factor)
 aim_y_down = int(screen_y_center + aim_y / 2 - y_correction_factor)
 time.sleep(2)
-
+# 暂停自瞄标志
+pause_aim = False
+last_f1_state = False
 @torch.no_grad()
 def find_target(
         weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
@@ -183,6 +185,7 @@ def find_target(
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
+    global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -202,6 +205,16 @@ def find_target(
     # print(f"imgz = {imgsz}")
 
     while True:
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        if current_f1_state and not last_f1_state:
+            pause_aim = not pause_aim
+            print(f"Aim {'Stop' if pause_aim else 'Start'}")
+
+        last_f1_state = current_f1_state
+
+        if pause_aim:
+            time.sleep(0.1)
+            continue
         img0 = grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 

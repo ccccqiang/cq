@@ -5,19 +5,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 import torch
-from ctypes import windll
 from mouse_controller import move_mouse_to_head
-import ctypes
-
-# 添加DLL路径
-sys.path.append(r'C:\Users\home123\cq\pythonDXGI\py3.9')
-os.add_dll_directory(r'C:\Users\home123\cq\pythonDXGI\py3.9\DXGI.pyd')
-
-# Windows 时间优化
-windll.winmm.timeBeginPeriod(1)
-stop = windll.kernel32.Sleep
-
-# 导入 DXGI 屏幕捕获库
 import DXGI
 
 # 设置 ONNX Runtime 的会话选项
@@ -28,7 +16,7 @@ providers = [("CUDAExecutionProvider", {"device_id": torch.cuda.current_device()
     ("CPUExecutionProvider", {})]
 
 # 加载 ONNX 模型
-onnx_model_path = r"E:\123pan\Downloads\ai\onnx\cs2.onnx"
+onnx_model_path = r"C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
 ort_session = ort.InferenceSession(onnx_model_path, sess_options=sess_options, providers=providers)
 
 # 输出使用的执行提供者
@@ -43,7 +31,6 @@ g = DXGI.capture(0, 0, screen_width, screen_height)
 
 # FPS 计算
 prev_time = 0
-
 
 def preprocess(img):
     img = cv2.resize(img, (320, 320)).astype(np.float32) / 255.0
@@ -100,10 +87,9 @@ while True:
         # 调整坐标以适应全屏
         adjusted_boxes = [(center_x + x, center_y + y, class_id, confidence) for (x, y, class_id, confidence) in
                           detected_boxes]
-        # print(adjusted_boxes)
+
         # 调用鼠标移动函数
-        driver = ctypes.CDLL(r'C:\Users\home123\cq\LGMC\logitech.driver.dll')  # 加载驱动
-        move_mouse_to_head(adjusted_boxes, driver)
+        move_mouse_to_head(adjusted_boxes)
 
         # 显示检测结果
         cv2.imshow('YOLOv5n ONNX Detection', img_cropped)

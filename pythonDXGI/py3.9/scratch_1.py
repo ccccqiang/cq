@@ -1,82 +1,119 @@
+import os
+import sys
+import time
 import cv2
 import numpy as np
-import onnxruntime
-import subprocess
+import onnxruntime as ort
+from ctypes import windll
 
-# 加载YOLO ONNX模型
-onnx_model_path = r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\cs2.onnx'
-ort_session = onnxruntime.InferenceSession(onnx_model_path)
+# 确保所需的DLL在路径中
+sys.path.append(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9')
+os.add_dll_directory(r'C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\DXGI.pyd')
 
+# Windows时间优化
+windll.winmm.timeBeginPeriod(1)
+stop = windll.kernel32.Sleep
 
-# 定义YOLO推理函数
-def yolo_inference(frame):
-    # 将BGR图像转换为RGB
-    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+# 导入 DXGI 屏幕捕获库
+import DXGI
 
-    # 进行YOLO推理
-    input_name = ort_session.get_inputs()[0].name
-    output_name = ort_session.get_outputs()[0].name
+# 加载 ONNX 模型
+providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if ort.get_device() == 'CUDA' else ['CPUExecutionProvider']
+onnx_model_path = r"C:\Users\Administrator\PycharmProjects\cq\pythonDXGI\py3.9\onnx\cs2.onnx"
+ort_session = ort.InferenceSession(onnx_model_path, providers=providers)
 
-    # 将输入图像调整为YOLO所需的尺寸
-    resized_img = cv2.resize(img, (640, 640))  # 依赖于模型输入尺寸
-    input_array = resized_img.transpose(2, 0, 1).astype(np.float32) / 255.0  # 归一化并调整维度
-    input_array = np.expand_dims(input_array, axis=0)  # 扩展batch维度
+# 定义屏幕捕获区域
+screen_width = 1920  # 设置为你的屏幕宽度
+screen_height = 1080  # 设置为你的屏幕高度
+capture_width = 320
+capture_height = 320
 
-    # 推理
-    detections = ort_session.run([output_name], {input_name: input_array})[0]
+# 捕获全屏
+g = DXGI.capture(0, 0, screen_width, screen_height)
 
-    return detections
+# 定义计算FPS的变量
+prev_time = 0
 
+# 预处理图像
+def preprocess(img):
+    img = cv2.resize(img, (320, 320))  # 调整图像为320x320
+    img = img.astype(np.float32) / 255.0  # 归一化到0到1之间
+    img = np.transpose(img, (2, 0, 1))  # 转换为 (C, H, W) 格式
+    img = np.expand_dims(img, axis=0)  # 添加批量维度
+    return img
 
-# 通过ffplay捕获屏幕流
-ffplay_path = r"C:\Users\home123\Documents\screen-capture-record2dxgi演示\ffplay64.exe"
-command = [
-    ffplay_path,
-    '-f', 'dshow',
-    '-i', 'video=screen-capture-dxgi-qq35744025',  # 使用合适的设备名称
-    '-x', '800',  # 屏幕分辨率
-    '-vf', 'transpose=0,transpose=2',
-    '-an', '-sn', '-t', '60'  # 可以设置捕获时长等
-]
+# 后处理和NMS
+def postprocess(output, img, conf_threshold=0.5, iou_threshold=0.4):
+    boxes = []
+    scores = []
+    class_ids = []
 
-# 启动ffplay命令
-process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    for detection in output[0]:
+        x, y, w, h, conf, *class_scores = detection
+        if conf > conf_threshold:
+            class_id = np.argmax(class_scores)
+            score = class_scores[class_id]
+            if score > conf_threshold:
+                boxes.append([x - w / 2, y - h / 2, w, h])  # 计算边界框
+                scores.append(score)
+                class_ids.append(class_id)
 
-# 捕获视频流（使用OpenCV）
-cap = cv2.VideoCapture('screen-capture-dxgi-qq35744025')  # 通过dshow捕获屏幕
-if not cap.isOpened():
-    print("Error: Could not open video capture.")
-    exit()
+    indices = cv2.dnn.NMSBoxes(boxes, scores, conf_threshold, iou_threshold)
 
+    detected_boxes = []
+
+    if len(indices) > 0:
+        for i in indices.flatten():
+            box = boxes[i]
+            x, y, w, h = box
+            x, y, w, h = int(x), int(y), int(w), int(h)
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # 绘制矩形框
+            label = f"{class_ids[i]}: {scores[i]:.2f}"
+            cv2.putText(img, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+# 定义处理流程
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Failed to capture frame")
+    try:
+        # 捕获全屏
+        img = g.cap()
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)  # 转换为BGR格式
+
+        # 计算中心位置的左上角坐标
+        center_x = (screen_width - capture_width) // 2
+        center_y = (screen_height - capture_height) // 2
+
+        # 从全屏图像中提取中心320x320区域
+        img_cropped = img[center_y:center_y + capture_height, center_x:center_x + capture_width]
+
+        # 预处理图像
+        input_tensor = preprocess(img_cropped)
+
+        # ONNX 推理
+        onnx_inputs = {ort_session.get_inputs()[0].name: input_tensor}
+        onnx_outputs = ort_session.run(None, onnx_inputs)
+
+        # 获取推理结果并绘制
+        output = onnx_outputs[0]
+        postprocess(output, img_cropped)
+
+        # 显示带检测的图像
+        cv2.imshow('YOLOv5n ONNX Detection', img_cropped)
+
+        # 计算 FPS
+        current_time = time.time()
+        fps = 1 / (current_time - prev_time)
+        prev_time = current_time
+
+        print(f"FPS: {fps:.2f}")
+
+        # 按'q'键退出
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    except Exception as e:
+        print(f"发生错误: {e}")
         break
 
-    # 对帧进行YOLO推理
-    detections = yolo_inference(frame)
-
-    if detections.size == 0:
-        print("No detections found.")
-    else:
-        print(f"Detections: {detections.shape[0]} objects detected.")
-
-    # 假设detections包含bounding boxes: [x1, y1, x2, y2, confidence, class_id]
-    for detection in detections:
-        # 过滤低置信度的检测
-        if detection[4] > 0.5:  # 置信度阈值
-            x1, y1, x2, y2 = detection[:4]
-            # 绘制边框
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-
-    # 显示推理后的帧
-    cv2.imshow('YOLO Inference', frame)
-
-    # 按'q'键退出
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# 释放资源
-cap.release()
+# 清理资源
 cv2.destroyAllWindows()

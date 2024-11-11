@@ -133,7 +133,7 @@ for i in range(len(config_list)):
     index2 = config_list[i][0].find("#")
     last_configs_list.append(float(config_list[i][0][index1 + 1:index2]))
     configs_dict[i + 1] = float(config_list[i][0][index1 + 1:index2])
-
+print(f"配置写入：{configs_dict}")
 y_correction_factor = configs_dict[1]
 x_correction_factor = 0
 screen_x, screen_y = configs_dict[2], configs_dict[3]
@@ -169,21 +169,37 @@ aim_y_down = int(screen_y_center + aim_y / 2 - y_correction_factor)
 time.sleep(2)
 
 @torch.no_grad()
-def find_target():
-    # Load model and set up inference
-    weights = ROOT / 'cs2.engine'
-    data = ROOT / 'data/coco128.yaml'
-    imgsz = (320, 320)
-    conf_thres = 0.5
-    iou_thres = 0.45
-    max_det = 10
-    device = select_device(0)  # 选择设备，device 是 '0', 'cpu' 等字符串
-    model = DetectMultiBackend(weights, device=torch.device(device), data=data, fp16=True)  # 确保传递 torch.device 对象
+def find_target(
+        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        # weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
+        data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
+        imgsz=(320, 320),  # inference size (height, width)
+        conf_thres=0.5,  # confidence threshold
+        iou_thres=0.45,  # NMS IOU threshold
+        max_det=10,  # maximum detections per image
+        device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        agnostic_nms=False,  # class-agnostic NMS
+        half=True,  # use FP16 half-precision inference
+        dnn=False,  # use OpenCV DNN for ONNX inference
+):
+    # Load model
+    device = select_device(device)
+    model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
-    imgsz = check_img_size(imgsz, s=stride)
+    imgsz = check_img_size(imgsz, s=stride)  # check image size
 
-    model.warmup(imgsz=(1, 3, *imgsz))
+    bs = 1  # batch_size
+    model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))
     time.sleep(0.5)
+
+    # t1 = time_sync()
+
+    # img0 = cv2.imread('./data/images/apex_test4.jpg')   # test picture
+    # img0 = cv2.imread('./data/images/0.png')
+
+    # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
+    # print(f"imgz = {imgsz}")
 
     while True:
         img0 = grab_screen(grab_window_location)
@@ -200,7 +216,8 @@ def find_target():
             img = img[None]
 
         pred = model(img, augment=False, visualize=False)
-        pred = non_max_suppression(pred, conf_thres, iou_thres, max_det=max_det)
+        # NMS
+        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
         det = pred[0]
 
         target_distance_list = []
@@ -222,8 +239,18 @@ def find_target():
             print('\033[0;33;40m' + f"target-X = {target_xywh_x}  target—Y = {target_xywh_y}" + '\033[0m')
             if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
 
-                aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON) \
-                            or win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+                if configs_dict[12] == 3:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON) \
+                                or win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+                elif configs_dict[12] == 2:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_RBUTTON)
+
+                elif configs_dict[12] == 1:
+                    aim_mouse = win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+
+                else:
+                    print("请填入正确的鼠标瞄准模式数字 1 或 2 或 3, Please fill the correct aim mod number 1 or 2 or 3")
+                    break
 
                 if aim_mouse:
                     final_x = target_xywh_x - screen_x_center

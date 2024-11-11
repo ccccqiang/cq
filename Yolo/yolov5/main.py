@@ -210,7 +210,7 @@ def find_target(
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
     print(f"imgz = {imgsz}")
     while True:
-        # 检查 F1 键的状态
+        # 检查 UP 键的状态
         current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
         if current_f1_state and not last_f1_state:
             pause_aim = not pause_aim

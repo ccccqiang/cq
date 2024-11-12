@@ -202,7 +202,7 @@ def find_target(
     # img0 = cv2.imread('./data/images/0.png')
 
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
-    # print(f"imgz = {imgsz}")
+    print(f"imgz = {imgsz}")
 
     while True:
         current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000

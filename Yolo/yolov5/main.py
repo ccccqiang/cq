@@ -3,11 +3,9 @@ import sys
 import time
 from pathlib import Path
 import numpy as np
-# import serial
 import torch
 import win32api
 import win32con
-
 from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
@@ -15,9 +13,94 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import grab_screen
 from PID import PID
 from FPS import FPS  # 导入FPS类
+import ctypes
 
 # 初始化FPS计数器
 fps = FPS()
+
+# Load Logitech Driver DLL globally
+try:
+    driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
+    ok = driver.device_open() == 1  # The driver can only be opened once per process
+    if not ok:
+        print('Error, GHUB or LGS driver not found')
+except FileNotFoundError:
+    print(f'Error, DLL file not found')
+
+class Logitech:
+
+    class mouse:
+        """
+        code: 1: Left button, 2: Middle button, 3: Right button
+        """
+
+        @staticmethod
+        def press(code):
+            if not ok:
+                return
+            driver.mouse_down(code)
+
+        @staticmethod
+        def release(code):
+            if not ok:
+                return
+            driver.mouse_up(code)
+
+        @staticmethod
+        def click(code):
+            if not ok:
+                return
+            driver.mouse_down(code)
+            driver.mouse_up(code)
+
+        @staticmethod
+        def scroll(a):
+            """
+            a: Scroll step, unclear meaning
+            """
+            if not ok:
+                return
+            driver.scroll(a)
+
+        @staticmethod
+        def move(x, y):
+            """
+            Relative movement. For absolute movement, you need to use pywin32's win32gui to calculate positions.
+            pip install pywin32 -i https://pypi.tuna.tsinghua.edu.cn/simple
+            x: Horizontal movement distance and direction, positive to the right, negative to the left
+            y: Vertical movement distance and direction
+            """
+            if not ok:
+                return
+            if x == 0 and y == 0:
+                return
+            driver.moveR(x, y, True)  # Relative movement
+
+    class keyboard:
+        """
+        Keyboard key functions use the corresponding key code.
+        code: 'a'-'z': A-Z, '0'-'9': 0-9, other keys are not specified
+        """
+
+        @staticmethod
+        def press(code):
+            if not ok:
+                return
+            driver.key_down(code)
+
+        @staticmethod
+        def release(code):
+            if not ok:
+                return
+            driver.key_up(code)
+
+        @staticmethod
+        def click(code):
+            if not ok:
+                return
+            driver.key_down(code)
+            driver.key_up(code)
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -53,13 +136,7 @@ for i in range(len(config_list)):
 
 print(f"配置写入：{configs_dict}")
 
-# ser = serial.Serial(f'{com_text}', 115200)
-# ser.write('import km\r\n'.encode('utf-8'))
-
 time.sleep(0.1)
-
-# print('kmbox 成功导入模块:', str(ser.read(ser.inWaiting()), 'utf-8'))
-
 
 y_correction_factor = configs_dict[1]  # 截图位置修正， 值越大截图窗口向上
 x_correction_factor = 0  # 截图位置修正， 值越大截图窗口向右移动
@@ -94,22 +171,27 @@ aim_y_up = int(screen_y_center - aim_y / 2 - y_correction_factor)  # 自瞄上�
 aim_y_down = int(screen_y_center + aim_y / 2 - y_correction_factor)
 time.sleep(2)
 
+# 暂停自瞄标志
+pause_aim = False
+last_f1_state = False
 
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
-        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / 'apex_best_2.pt',  # model.pt path(s)
+        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
+    global pause_aim, last_f1_state
+
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -128,6 +210,18 @@ def find_target(
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
     print(f"imgz = {imgsz}")
     while True:
+        # 检查 UP 键的状态
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        if current_f1_state and not last_f1_state:
+            pause_aim = not pause_aim
+            print(f"Aim {'Stop' if pause_aim else 'Start'}")
+
+        last_f1_state = current_f1_state
+
+        if pause_aim:
+            time.sleep(0.1)
+            continue
+
         img0 = grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
@@ -149,20 +243,15 @@ def find_target(
         target_distance_list = []
         target_xywh_list = []
         if len(det):
-            # print('move 回码：', str(ser.read(ser.inWaiting()), 'utf-8'))
-
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
 
             for *xyxy, conf, cls in reversed(det):
                 xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4))).view(-1).tolist()  # 不使用归一化，返回坐标图片
 
-                # print('\033[0;40;40m' + f'   xywh = {xywh}   \n' + '\033[0m')
-
                 target_xywh_list.append(xywh)
                 target_distance = abs(edge_x + xywh[0] - screen_x_center)
 
                 target_distance_list.append(target_distance)
-            # print(f"target_distance_list= {target_distance_list}")
             min_index = target_distance_list.index(min(target_distance_list))
             target_xywh = target_xywh_list[min_index]
 
@@ -190,21 +279,15 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    # 鼠标计算相对移动距离 (calculate mouse relative move distance)
                     final_x = target_xywh_x - screen_x_center
                     final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
+
+                    # Move the mouse
+                    Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-
-                    """ 单片机执行位移，每个人位移的实现不一样，位移坐标你都拿到了，动鼠标的事情自己考虑
-                    since you have gotten the x y movement data,choose your own way to move the mouse to aim enemy"""
-
-                    # ser.write(f'km.move({pid_x},{pid_y})\r\n'.encode('utf-8'))
-
-
-
 
         else:
             print('\033[0;31;40m' + f'  no target   ' + '\033[0m')

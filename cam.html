@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择虚拟摄像头并显示中心区域（最大帧率）</title>
+</head>
+<body>
+    <h1>选择虚拟摄像头并显示中心区域</h1>
+    <select id="cameraSelect"></select>
+    <video id="videoElement" width="640" height="480" autoplay style="display: none;"></video>
+    <canvas id="canvasElement" width="320" height="320"></canvas>
+    <p>当前帧率: <span id="frameRate">0</span> FPS</p>
+
+    <script>
+        let lastTime = 0; // 上一帧的时间戳
+        let frameCount = 0; // 计算帧数
+        let fps = 0; // 帧率
+
+        async function getCameraList() {
+            try {
+                // 获取所有媒体设备
+                const devices = await navigator.mediaDevices.enumerateDevices();
+
+                // 筛选出视频输入设备（摄像头）
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                const cameraSelect = document.getElementById('cameraSelect');
+
+                // 清空选择框
+                cameraSelect.innerHTML = '';
+
+                // 添加一个默认的选项
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.text = '请选择摄像头';
+                cameraSelect.appendChild(defaultOption);
+
+                // 为每个摄像头设备添加选项
+                videoDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `摄像头 ${device.deviceId}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                // 如果有可用的摄像头，默认选择第一个
+                if (videoDevices.length > 0) {
+                    cameraSelect.selectedIndex = 1;
+                    startCamera(videoDevices[0].deviceId); // 默认启动第一个摄像头
+                }
+            } catch (error) {
+                console.error('获取设备列表失败: ', error);
+                alert('无法访问摄像头设备列表');
+            }
+        }
+
+        async function startCamera(deviceId) {
+            try {
+                // 获取用户选择的摄像头，不限制帧率（摄像头最大支持帧率）
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+                });
+
+                // 获取 video 元素
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+
+                // 获取帧率并绘制中心区域
+                calculateFPS(videoElement);
+                captureCenterFrame(videoElement);
+            } catch (error) {
+                console.error('获取摄像头失败: ', error);
+                alert('无法访问选择的摄像头');
+            }
+        }
+
+        function calculateFPS(videoElement) {
+            function updateFrameRate() {
+                const currentTime = performance.now(); // 获取当前时间戳
+                frameCount++;
+
+                // 每隔一秒更新帧率
+                if (currentTime - lastTime >= 1000) {
+                    fps = frameCount;
+                    document.getElementById('frameRate').textContent = fps; // 更新帧率显示
+                    frameCount = 0; // 重置帧计数
+                    lastTime = currentTime; // 更新上次时间戳
+                }
+
+                // 强制每秒更新
+                requestAnimationFrame(updateFrameRate);
+            }
+
+            updateFrameRate();
+        }
+
+        function captureCenterFrame(videoElement) {
+            const canvas = document.getElementById('canvasElement');
+            const ctx = canvas.getContext('2d');
+
+            function drawCenter() {
+                // 计算视频的中心区域坐标
+                const videoWidth = videoElement.videoWidth;
+                const videoHeight = videoElement.videoHeight;
+                const centerX = (videoWidth - 320) / 2;
+                const centerY = (videoHeight - 320) / 2;
+
+                // 绘制视频流中的中心320x320区域到canvas
+                ctx.drawImage(videoElement, centerX, centerY, 320, 320, 0, 0, 320, 320);
+
+                // 每帧都强制更新
+                requestAnimationFrame(drawCenter);
+            }
+
+            drawCenter();
+        }
+
+        // 监听摄像头选择框变化
+        document.getElementById('cameraSelect').addEventListener('change', function () {
+            const deviceId = this.value;
+            startCamera(deviceId); // 启动选定的摄像头
+        });
+
+        // 获取并显示所有可用的摄像头
+        getCameraList();
+    </script>
+</body>
+</html>

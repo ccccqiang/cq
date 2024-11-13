@@ -182,6 +182,9 @@ def find_target(
                 elif configs_dict[12] == 1:
                     aim_mouse = win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
 
+                elif configs_dict[12] == 0:
+                    aim_mouse = True
+
                 else:
                     print("请填入正确的鼠标瞄准模式数字 1 或 2 或 3, Please fill the correct aim mod number 1 or 2 or 3")
                     break

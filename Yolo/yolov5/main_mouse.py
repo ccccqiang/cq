@@ -13,6 +13,7 @@ from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyx
 from utils.torch_utils import select_device, time_sync
 from grabscreen import grab_screen
 from PID import PID
+import threading
 # from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
 # fps = FPS()
@@ -170,6 +171,60 @@ time.sleep(2)
 # 暂停自瞄标志
 pause_aim = False
 last_f1_state = False
+def load_config():
+    """读取配置文件并更新 PID 控制参数"""
+    global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y, y_portion
+
+    with open('configs.txt', 'r', encoding="utf-8") as f:
+        config_list = []
+        for config_line in f:
+            # 移除行尾的空白字符并分割每行数据
+            config_line = config_line.strip()
+            if not config_line or config_line.startswith("#"):
+                continue  # 跳过空行和注释行
+
+            # 去除注释部分
+            index_of_comment = config_line.find("#")
+            if index_of_comment != -1:
+                config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
+
+            # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
+            if '=' in config_line:
+                config_list.append(config_line.split("="))
+
+    # 打印读取的配置列表，调试用
+    print(f"配置文件内容：{config_list}")
+
+    # 确保配置文件中的 PID 参数行存在且格式正确
+    try:
+        # 解析 PID 参数
+        Kp = float(config_list[7][1].strip())  # 假设 PID 参数在第 8 行，第 2 列
+        Ki = float(config_list[8][1].strip())  # 第 9 行，第 2 列
+        Kd = float(config_list[9][1].strip())  # 第 10 行，第 2 列
+        PID_time = float(config_list[6][1].strip())  # PID 时间常数在第 7 行，第 2 列
+        screen_x, screen_y  = float(config_list[2][1].strip()),float(config_list[3][1].strip())
+        window_x, window_y = float(config_list[4][1].strip()),float(config_list[5][1].strip())
+        y_portion = float(config_list[10][1].strip())
+    except IndexError:
+        # print("配置文件格式错误，无法解析 PID 参数。")
+        return
+
+    pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)  # 更新 PID 控制器
+    screen_x,screen_y = screen_x,screen_y
+    y_portion = y_portion
+
+    # print(f"PID 参数更新为 Kp={Kp}, Ki={Ki}, Kd={Kd},{screen_x},{screen_y}")
+
+
+def update_pid_in_background():
+    """每隔一定时间更新一次 PID 参数"""
+    while True:
+        load_config()
+        time.sleep(1)  # 每 1 秒钟更新一次
+
+# 启动线程来更新 PID 参数
+pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=True)
+pid_update_thread.start()
 @torch.no_grad()
 def find_target(
         weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型

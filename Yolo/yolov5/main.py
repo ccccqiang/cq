@@ -235,7 +235,7 @@ pid_update_thread.start()
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
         # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
+        weights=ROOT / r'C:\Users\home123\cq\onnx\valorant-n-3.pt',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold

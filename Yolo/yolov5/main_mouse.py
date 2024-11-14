@@ -167,7 +167,9 @@ aim_y = configs_dict[14]
 aim_y_up = int(screen_y_center - aim_y / 2 - y_correction_factor)
 aim_y_down = int(screen_y_center + aim_y / 2 - y_correction_factor)
 time.sleep(2)
-
+# 暂停自瞄标志
+pause_aim = False
+last_f1_state = False
 @torch.no_grad()
 def find_target(
         weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
@@ -178,11 +180,12 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        classes=[1, 3],  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
+    global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -199,9 +202,19 @@ def find_target(
     # img0 = cv2.imread('./data/images/0.png')
 
     # for i in range(500):           # for i in range(500) 运行500轮测速 (run 500 rounds to check each round spend)
-    # print(f"imgz = {imgsz}")
+    print(f"imgz = {imgsz}")
 
     while True:
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        if current_f1_state and not last_f1_state:
+            pause_aim = not pause_aim
+            print(f"Aim {'Stop' if pause_aim else 'Start'}")
+
+        last_f1_state = current_f1_state
+
+        if pause_aim:
+            time.sleep(0.1)
+            continue
         img0 = grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
@@ -247,6 +260,9 @@ def find_target(
 
                 elif configs_dict[12] == 1:
                     aim_mouse = win32api.GetAsyncKeyState(win32con.VK_LBUTTON)
+
+                elif configs_dict[12] == 0:
+                    aim_mouse = True
 
                 else:
                     print("请填入正确的鼠标瞄准模式数字 1 或 2 或 3, Please fill the correct aim mod number 1 or 2 or 3")

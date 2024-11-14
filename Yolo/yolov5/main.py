@@ -111,7 +111,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 com_text = ""
 configs_dict = {}
 config_list = []
-with open('configs.txt', 'r', encoding="utf-8") as f:
+with open('123.txt', 'r', encoding="utf-8") as f:
     for config_line in f:
         config_list.append(list(config_line.strip('\n').split(',')))
 f.close()

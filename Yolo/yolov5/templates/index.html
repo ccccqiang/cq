@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>配置管理</title>
 </head>
 <body>
     <h1>配置管理</h1>
-    <form method="POST">
-        {% for key, value in configs.items() %}
-            <label for="{{ key }}">{{ key }}:</label>
-            <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}">
-            <br>
+    <form method="post">
+        {% for key, value in configs %}
+            {% if key.startswith('line_') %}
+                <p>{{ value }}</p>
+            {% else %}
+                <div>
+                    <label for="{{ key }}">{{ key }}:</label>
+                    <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+                </div>
+            {% endif %}
         {% endfor %}
-        <input type="submit" value="保存配置">
+        <button type="submit">保存配置</button>
     </form>
 </body>
 </html>

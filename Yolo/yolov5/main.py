@@ -179,7 +179,7 @@ last_f1_state = False
 
 def load_config():
     """读取配置文件并更新 PID 控制参数"""
-    global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y
+    global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y, y_portion
 
     with open('configs.txt', 'r', encoding="utf-8") as f:
         config_list = []
@@ -210,13 +210,16 @@ def load_config():
         PID_time = float(config_list[6][1].strip())  # PID 时间常数在第 7 行，第 2 列
         screen_x, screen_y  = float(config_list[2][1].strip()),float(config_list[3][1].strip())
         window_x, window_y = float(config_list[4][1].strip()),float(config_list[5][1].strip())
+        y_portion = float(config_list[10][1].strip())
     except IndexError:
-        print("配置文件格式错误，无法解析 PID 参数。")
+        # print("配置文件格式错误，无法解析 PID 参数。")
         return
 
     pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)  # 更新 PID 控制器
     screen_x,screen_y = screen_x,screen_y
-    print(f"PID 参数更新为 Kp={Kp}, Ki={Ki}, Kd={Kd},{screen_x},{screen_y}")
+    y_portion = y_portion
+
+    # print(f"PID 参数更新为 Kp={Kp}, Ki={Ki}, Kd={Kd},{screen_x},{screen_y}")
 
 
 def update_pid_in_background():

@@ -10,15 +10,15 @@
 
 # PID控制调节
 6. PID_time = 0.005
-7. Kp = 1.8
-8. Ki = 0.66
-9. Kd = 0.00000005
+7. Kp = 0.932
+8. Ki = 1.43
+9. Kd = 0.0000005
 
-10. y_portion = 0.2
+10. y_portion = 0.6
 
 11. max_step = 30
 
-12. aim_mod = 3
+12. aim_mod = 0
 
 13. aim_width = 150
 14. aim_width = 300

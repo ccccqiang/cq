@@ -22,6 +22,7 @@
 
 13. aim_width = 100         # 自瞄宽度
 14. aim_width = 100          # 自瞄高度
+15. classes = 0              # 自瞄高度
 
 
 

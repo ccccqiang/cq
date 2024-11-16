@@ -22,6 +22,7 @@
 
 13. aim_width = 150
 14. aim_width = 300
+15. classes = 1
 
 
 

@@ -147,6 +147,7 @@ Ki = configs_dict[8]
 Kd = configs_dict[9]
 y_portion = configs_dict[10]
 max_step = configs_dict[11]
+classes = configs_dict[15]
 pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)
 
 # Grab window location for screen capture
@@ -173,7 +174,7 @@ pause_aim = False
 last_f1_state = False
 def load_config():
     """读取配置文件并更新 PID 控制参数"""
-    global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y, y_portion
+    global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y, y_portion, classes
 
     with open('configs.txt', 'r', encoding="utf-8") as f:
         config_list = []
@@ -205,6 +206,7 @@ def load_config():
         screen_x, screen_y  = float(config_list[2][1].strip()),float(config_list[3][1].strip())
         window_x, window_y = float(config_list[4][1].strip()),float(config_list[5][1].strip())
         y_portion = float(config_list[10][1].strip())
+        classes = int(config_list[15][1].strip())
     except IndexError:
         # print("配置文件格式错误，无法解析 PID 参数。")
         return
@@ -212,7 +214,7 @@ def load_config():
     pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)  # 更新 PID 控制器
     screen_x,screen_y = screen_x,screen_y
     y_portion = y_portion
-
+    classes = classes
     # print(f"PID 参数更新为 Kp={Kp}, Ki={Ki}, Kd={Kd},{screen_x},{screen_y}")
 
 
@@ -235,11 +237,30 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=[1,3],  # filter by class: --class 0, or --class 0 2 3
+        classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
+    load_config()
+    with open('configs.txt', 'r', encoding="utf-8") as f:
+        config_list = []
+        for config_line in f:
+            # 移除行尾的空白字符并分割每行数据
+            config_line = config_line.strip()
+            if not config_line or config_line.startswith("#"):
+                continue  # 跳过空行和注释行
+
+            # 去除注释部分
+            index_of_comment = config_line.find("#")
+            if index_of_comment != -1:
+                config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
+
+            # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
+            if '=' in config_line:
+                config_list.append(config_line.split("="))
+    if classes is None:
+        classes = int(config_list[15][1].strip())
     global pause_aim, last_f1_state
     # Load model
     device = select_device(device)

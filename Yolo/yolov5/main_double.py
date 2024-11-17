@@ -259,7 +259,7 @@ def find_target(
             # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
             if '=' in config_line:
                 config_list.append(config_line.split("="))
-    # if classes is None:
+    if classes is None:
         classes = int(config_list[15][1].strip())
     global pause_aim, last_f1_state
     # Load model

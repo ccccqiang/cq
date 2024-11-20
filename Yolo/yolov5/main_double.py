@@ -14,7 +14,6 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import grab_screen
 from PID import PID
 import threading
-from kalman import KalmanFilter
 # from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
 # fps = FPS()
@@ -177,7 +176,7 @@ def load_config():
     """读取配置文件并更新 PID 控制参数"""
     global Kp, Ki, Kd, PID_time, pid, screen_x, screen_y, window_x, window_y, y_portion, classes
 
-    with open('configs.txt', 'r', encoding="utf-8") as f:
+    with open('config_double.txt', 'r', encoding="utf-8") as f:
         config_list = []
         for config_line in f:
             # 移除行尾的空白字符并分割每行数据
@@ -244,7 +243,7 @@ def find_target(
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
     load_config()
-    with open('configs.txt', 'r', encoding="utf-8") as f:
+    with open('config_double.txt', 'r', encoding="utf-8") as f:
         config_list = []
         for config_line in f:
             # 移除行尾的空白字符并分割每行数据

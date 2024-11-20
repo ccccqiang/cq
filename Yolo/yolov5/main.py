@@ -251,7 +251,7 @@ def find_target(
 ):
     global pause_aim, last_f1_state
     kf_x = KalmanFilter(
-        dt=0.1,  # 假设每个预测时间间隔为 0.1 秒
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
         process_noise=1,  # 过程噪声
         measurement_noise=10,  # 测量噪声
         initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
@@ -259,7 +259,7 @@ def find_target(
     )
 
     kf_y = KalmanFilter(
-        dt=0.1,  # 假设每个预测时间间隔为 0.1 秒
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
         process_noise=1,  # 过程噪声
         measurement_noise=10,  # 测量噪声
         initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0

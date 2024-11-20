@@ -14,6 +14,7 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import grab_screen
 from PID import PID
 import threading
+from kalman import KalmanFilter
 # from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
 # fps = FPS()

@@ -15,6 +15,8 @@ from PID import PID
 from FPS import FPS  # 导入FPS类
 import ctypes
 import threading
+from kalman import KalmanFilter
+
 
 # 初始化FPS计数器
 fps = FPS()
@@ -248,6 +250,21 @@ def find_target(
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
     global pause_aim, last_f1_state
+    kf_x = KalmanFilter(
+        dt=0.1,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
+
+    kf_y = KalmanFilter(
+        dt=0.1,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
 
     # Load model
     device = select_device(device)
@@ -336,8 +353,16 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    final_x = target_xywh_x - screen_x_center
-                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                    # 更新卡尔曼滤波器
+                    kf_x.predict()
+                    kf_y.predict()
+
+                    # 使用卡尔曼滤波器更新目标的坐标
+                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+
+                    final_x = int(filtered_x)
+                    final_y = int(filtered_y)
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))

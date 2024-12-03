@@ -1,6 +1,8 @@
 # mouse_controller.py
 
 import ctypes
+import serial
+import time
 import win32api
 import win32con
 
@@ -85,7 +87,85 @@ class LogitechKeyboard:
         self.driver.key_down(code)
         self.driver.key_up(code)
 
+class CH9350Mouse:
+    """
+    A class for controlling the mouse using the CH9350 chip.
+    This class communicates with CH9350 via a serial interface.
+    """
+    def __init__(self, port, baudrate=9600):
+        """
+        Initialize the CH9350 mouse controller.
+        :param port: Serial port (e.g., "COM3")
+        :param baudrate: Baud rate for serial communication
+        """
+        try:
+            self.ser = serial.Serial(port, baudrate)
+            time.sleep(2)  # Wait for the serial connection to initialize
+            print(f"Connected to CH9350 on {port} with baudrate {baudrate}")
+        except serial.SerialException as e:
+            print(f"Error opening serial port: {e}")
+            self.ser = None
 
+    def move(self, x, y):
+        """
+        Move the mouse relative to its current position using CH9350.
+        :param x: Horizontal movement, positive is to the right, negative is to the left
+        :param y: Vertical movement, positive is downward, negative is upward
+        """
+        if not self.ser:
+            print("Serial connection not initialized")
+            return
+        # Ensure x and y are within CH9350's accepted range (-127 to 127)
+        x = max(-127, min(127, x))
+        y = max(-127, min(127, y))
+        # Send the move command to CH9350
+        command = bytearray([0x02, x & 0xFF, y & 0xFF])
+        self.ser.write(command)
+
+    def click(self, button=1):
+        """
+        Simulate a mouse click using CH9350.
+        :param button: 1 for left-click, 2 for right-click
+        """
+        if not self.ser:
+            print("Serial connection not initialized")
+            return
+        # Map button to CH9350 protocol
+        if button == 1:
+            # Left-click
+            self.ser.write(bytearray([0x03, 0x01]))
+            time.sleep(0.1)
+            self.ser.write(bytearray([0x03, 0x00]))
+        elif button == 2:
+            # Right-click
+            self.ser.write(bytearray([0x03, 0x02]))
+            time.sleep(0.1)
+            self.ser.write(bytearray([0x03, 0x00]))
+
+    def close(self):
+        """
+        Close the serial connection.
+        """
+        if self.ser:
+            self.ser.close()
+            print("Serial connection closed")
+
+
+# Usage Guide:
+# -------------------------------------------
+# Example for using CH9350Mouse:
+#
+# from mouse_controller import CH9350Mouse
+#
+# mouse = CH9350Mouse(port="COM3")  # Initialize the CH9350 mouse on COM3
+# mouse.move(50, 20)               # Move the mouse 50 pixels to the right, 20 pixels down
+# mouse.click(1)                   # Left-click
+# mouse.close()                    # Close the serial connection
+#
+# -------------------------------------------
+# Notes:
+# - Ensure the CH9350 chip is connected to the specified COM port.
+# - Adjust the baud rate if necessary to match CH9350's default settings.
 # Usage Guide:
 # -------------------------------------------
 # Example for using LogitechMouse:

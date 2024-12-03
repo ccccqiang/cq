@@ -11,7 +11,7 @@ from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
 from utils.torch_utils import select_device, time_sync
-from grabscreen import grab_screen
+from grabscreen import ScreenGrabber
 from PID import PID
 import threading
 from kalman import KalmanFilter
@@ -242,26 +242,29 @@ def find_target(
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        use_capture_device=False,  # 设置为 True 表示使用采集卡
+        device_index=0,  # 采集卡索引，默认是0
 ):
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
     load_config()
-    with open('configs.txt', 'r', encoding="utf-8") as f:
-        config_list = []
-        for config_line in f:
-            # 移除行尾的空白字符并分割每行数据
-            config_line = config_line.strip()
-            if not config_line or config_line.startswith("#"):
-                continue  # 跳过空行和注释行
-
-            # 去除注释部分
-            index_of_comment = config_line.find("#")
-            if index_of_comment != -1:
-                config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
-
-            # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
-            if '=' in config_line:
-                config_list.append(config_line.split("="))
-    if classes is None:
-        classes = int(config_list[15][1].strip())
+    # with open('configs.txt', 'r', encoding="utf-8") as f:
+    #     config_list = []
+    #     for config_line in f:
+    #         # 移除行尾的空白字符并分割每行数据
+    #         config_line = config_line.strip()
+    #         if not config_line or config_line.startswith("#"):
+    #             continue  # 跳过空行和注释行
+    #
+    #         # 去除注释部分
+    #         index_of_comment = config_line.find("#")
+    #         if index_of_comment != -1:
+    #             config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
+    #
+    #         # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
+    #         if '=' in config_line:
+    #             config_list.append(config_line.split("="))
+    # if classes is None:
+    #     classes = int(config_list[15][1].strip())
     global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
@@ -292,7 +295,7 @@ def find_target(
         if pause_aim:
             time.sleep(0.1)
             continue
-        img0 = grab_screen(grab_window_location)
+        img0 = grabber.grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
         img = letterbox(img0, imgsz, stride=stride, auto=pt)[0]

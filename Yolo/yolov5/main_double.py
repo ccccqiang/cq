@@ -11,7 +11,7 @@ from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
 from utils.torch_utils import select_device, time_sync
-from grabscreen import grab_screen
+from grabscreen import ScreenGrabber
 from PID import PID
 import threading
 # from FPS import FPS  # 导入FPS类
@@ -19,7 +19,7 @@ import threading
 # fps = FPS()
 # Load Logitech Driver DLL globally
 try:
-    driver = ctypes.CDLL(r"C:\Users\Administrator\PycharmProjects\cq\LGMC\logitech.driver.dll")
+    driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
     ok = driver.device_open() == 1  # The driver can only be opened once per process
     if not ok:
         print('Error, GHUB or LGS driver not found')
@@ -229,38 +229,41 @@ pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=Tru
 pid_update_thread.start()
 @torch.no_grad()
 def find_target(
-        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
+        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        weights=ROOT / r'C:\Users\home123\cq\onnx\wazi.onnx',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(320, 320),  # inference size (height, width)
+        imgsz=(256, 256),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        use_capture_device = True,  # 设置为 True 表示使用采集卡
+        device_index = 0,  # 采集卡索引，默认是0
 ):
-    load_config()
-    with open('config_double.txt', 'r', encoding="utf-8") as f:
-        config_list = []
-        for config_line in f:
-            # 移除行尾的空白字符并分割每行数据
-            config_line = config_line.strip()
-            if not config_line or config_line.startswith("#"):
-                continue  # 跳过空行和注释行
-
-            # 去除注释部分
-            index_of_comment = config_line.find("#")
-            if index_of_comment != -1:
-                config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
-
-            # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
-            if '=' in config_line:
-                config_list.append(config_line.split("="))
-    if classes is None:
-        classes = int(config_list[15][1].strip())
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    # load_config()
+    # with open('config_double.txt', 'r', encoding="utf-8") as f:
+    #     config_list = []
+    #     for config_line in f:
+    #         # 移除行尾的空白字符并分割每行数据
+    #         config_line = config_line.strip()
+    #         if not config_line or config_line.startswith("#"):
+    #             continue  # 跳过空行和注释行
+    #
+    #         # 去除注释部分
+    #         index_of_comment = config_line.find("#")
+    #         if index_of_comment != -1:
+    #             config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
+    #
+    #         # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
+    #         if '=' in config_line:
+    #             config_list.append(config_line.split("="))
+    # if classes is None:
+    #     classes = int(config_list[15][1].strip())
     global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
@@ -291,7 +294,8 @@ def find_target(
         if pause_aim:
             time.sleep(0.1)
             continue
-        img0 = grab_screen(grab_window_location)
+
+        img0 = grabber.grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
         img = letterbox(img0, imgsz, stride=stride, auto=pt)[0]

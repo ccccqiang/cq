@@ -10,7 +10,7 @@ from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
 from utils.torch_utils import select_device, time_sync
-from grabscreen import grab_screen
+from grabscreen import ScreenGrabber
 from PID import PID
 from FPS import FPS  # 导入FPS类
 import ctypes
@@ -248,7 +248,10 @@ def find_target(
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        use_capture_device=True,  # 设置为 True 表示使用采集卡
+        device_index=0,  # 采集卡索引，默认是0
 ):
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
     global pause_aim, last_f1_state
     kf_x = KalmanFilter(
         dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
@@ -296,7 +299,7 @@ def find_target(
             time.sleep(0.1)
             continue
 
-        img0 = grab_screen(grab_window_location)
+        img0 = grabber.grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
         img = letterbox(img0, imgsz, stride=stride, auto=pt)[0]

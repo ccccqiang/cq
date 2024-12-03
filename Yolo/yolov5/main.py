@@ -19,7 +19,7 @@ from mouse_controller import LogitechMouse,LogitechKeyboard,CH9350Mouse
 # 初始化FPS计数器
 fps = FPS()
 # Initialize the LogitechMouse
-logitech_mouse = LogitechMouse()
+# logitech_mouse = LogitechMouse()
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory

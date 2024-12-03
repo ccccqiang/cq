@@ -13,96 +13,13 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import ScreenGrabber
 from PID import PID
 from FPS import FPS  # 导入FPS类
-import ctypes
 import threading
 from kalman import KalmanFilter
-
-
+from mouse_controller import LogitechMouse,LogitechKeyboard
 # 初始化FPS计数器
 fps = FPS()
-
-# Load Logitech Driver DLL globally
-try:
-    driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
-    ok = driver.device_open() == 1  # The driver can only be opened once per process
-    if not ok:
-        print('Error, GHUB or LGS driver not found')
-except FileNotFoundError:
-    print(f'Error, DLL file not found')
-
-class Logitech:
-
-    class mouse:
-        """
-        code: 1: Left button, 2: Middle button, 3: Right button
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.mouse_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-            driver.mouse_up(code)
-
-        @staticmethod
-        def scroll(a):
-            """
-            a: Scroll step, unclear meaning
-            """
-            if not ok:
-                return
-            driver.scroll(a)
-
-        @staticmethod
-        def move(x, y):
-            """
-            Relative movement. For absolute movement, you need to use pywin32's win32gui to calculate positions.
-            pip install pywin32 -i https://pypi.tuna.tsinghua.edu.cn/simple
-            x: Horizontal movement distance and direction, positive to the right, negative to the left
-            y: Vertical movement distance and direction
-            """
-            if not ok:
-                return
-            if x == 0 and y == 0:
-                return
-            driver.moveR(x, y, True)  # Relative movement
-
-    class keyboard:
-        """
-        Keyboard key functions use the corresponding key code.
-        code: 'a'-'z': A-Z, '0'-'9': 0-9, other keys are not specified
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.key_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.key_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.key_down(code)
-            driver.key_up(code)
+# Initialize the LogitechMouse
+logitech_mouse = LogitechMouse()
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -237,9 +154,9 @@ pid_update_thread.start()
 @torch.no_grad()  # 不要删 (do not delete it )
 def find_target(
         # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        weights=ROOT / r'C:\Users\home123\cq\onnx\valorant-n-3.pt',  # model.pt path(s)
+        weights=ROOT / r'C:\Users\home123\cq\onnx\wahuang.onnx',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(320, 320),  # inference size (height, width)
+        imgsz=(416, 416),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
@@ -248,7 +165,7 @@ def find_target(
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        use_capture_device=True,  # 设置为 True 表示使用采集卡
+        use_capture_device=False,  # 设置为 True 表示使用采集卡
         device_index=0,  # 采集卡索引，默认是0
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
@@ -371,17 +288,17 @@ def find_target(
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
 
-        else:
-            print('\033[0;31;40m' + f'  no target   ' + '\033[0m')
-        fps.update()
-    t3 = time_sync()
+    #     else:
+    #         print('\033[0;31;40m' + f'  no target   ' + '\033[0m')
+    #     fps.update()
+    # t3 = time_sync()
 
     # Print time (total circle)
-    LOGGER.info(f'\ntime = {(t3 - t1) * 1000 / 500:.3f}ms '
-                f'\n frequency = {1 / ((t3 - t1) / 500) :.3f} round per second')
+    # LOGGER.info(f'\ntime = {(t3 - t1) * 1000 / 500:.3f}ms '
+    #             f'\n frequency = {1 / ((t3 - t1) / 500) :.3f} round per second')
 
 
 if __name__ == "__main__":

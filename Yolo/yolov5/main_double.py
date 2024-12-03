@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import win32api
 import win32con
-import ctypes
 from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
@@ -14,92 +13,12 @@ from utils.torch_utils import select_device, time_sync
 from grabscreen import ScreenGrabber
 from PID import PID
 import threading
-# from FPS import FPS  # 导入FPS类
+from kalman import KalmanFilter
+from mouse_controller import LogitechMouse
+from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
-# fps = FPS()
-# Load Logitech Driver DLL globally
-try:
-    driver = ctypes.CDLL(r"C:\Users\home123\cq\LGMC\logitech.driver.dll")
-    ok = driver.device_open() == 1  # The driver can only be opened once per process
-    if not ok:
-        print('Error, GHUB or LGS driver not found')
-except FileNotFoundError:
-    print(f'Error, DLL file not found')
-
-class Logitech:
-
-    class mouse:
-        """
-        code: 1: Left button, 2: Middle button, 3: Right button
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.mouse_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-            driver.mouse_up(code)
-
-        @staticmethod
-        def scroll(a):
-            """
-            a: Scroll step, unclear meaning
-            """
-            if not ok:
-                return
-            driver.scroll(a)
-
-        @staticmethod
-        def move(x, y):
-            """
-            Relative movement. For absolute movement, you need to use pywin32's win32gui to calculate positions.
-            pip install pywin32 -i https://pypi.tuna.tsinghua.edu.cn/simple
-            x: Horizontal movement distance and direction, positive to the right, negative to the left
-            y: Vertical movement distance and direction
-            """
-            if not ok:
-                return
-            if x == 0 and y == 0:
-                return
-            driver.moveR(x, y, True)  # Relative movement
-
-    class keyboard:
-        """
-        Keyboard key functions use the corresponding key code.
-        code: 'a'-'z': A-Z, '0'-'9': 0-9, other keys are not specified
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.key_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.key_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.key_down(code)
-            driver.key_up(code)
-
+fps = FPS()
+logitech_mouse = LogitechMouse()
 # Configuration and Constants
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]
@@ -245,6 +164,21 @@ def find_target(
         device_index = 0,  # 采集卡索引，默认是0
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    kf_x = KalmanFilter(
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
+
+    kf_y = KalmanFilter(
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
     # load_config()
     # with open('config_double.txt', 'r', encoding="utf-8") as f:
     #     config_list = []
@@ -349,16 +283,23 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    final_x = target_xywh_x - screen_x_center
-                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                    # 更新卡尔曼滤波器
+                    kf_x.predict()
+                    kf_y.predict()
+
+                    # 使用卡尔曼滤波器更新目标的坐标
+                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+
+                    final_x = int(filtered_x)
+                    final_y = int(filtered_y)
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-
         else:
             print(f'No target found')
         # fps.update()

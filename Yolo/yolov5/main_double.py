@@ -142,14 +142,15 @@ def update_pid_in_background():
     while True:
         load_config()
         time.sleep(1)  # 每 1 秒钟更新一次
-def select_mouse(mouse_type="Logitech"):
+def select_mouse(mouse_type="Logitech", port="COM3", baudrate=115200):
     """Return the appropriate mouse controller based on selection."""
     if mouse_type == "Logitech":
         return LogitechMouse()
     elif mouse_type == "CH9350":
-        return CH9350Mouse()
+        return CH9350Mouse(port=port, baudrate=baudrate)  # 传递参数
     else:
         raise ValueError("Unsupported mouse type. Choose 'Logitech' or 'CH9350'.")
+
 
 
 # 启动线程来更新 PID 参数
@@ -157,24 +158,24 @@ pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=Tru
 pid_update_thread.start()
 @torch.no_grad()
 def find_target(
-        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        weights=ROOT / r'C:\Users\home123\cq\onnx\wazi.onnx',  # model.pt path(s)
+        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        # weights=ROOT / r'C:\Users\home123\cq\onnx\wazi.onnx',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(256, 256),  # inference size (height, width)
+        imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         use_capture_device = True,  # 设置为 True 表示使用采集卡
         device_index = 0,  # 采集卡索引，默认是0
-        mouse_type="Logitech",  # Add mouse type selection here
+        mouse_type="CH9350",  # Add mouse type selection here
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
-    mouse_controller = select_mouse(mouse_type)
+    mouse_controller = select_mouse(mouse_type, port="COM3", baudrate=115200)
     kf_x = KalmanFilter(
         dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
         process_noise=1,  # 过程噪声

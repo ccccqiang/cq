@@ -6,7 +6,8 @@ import time
 import win32api
 import win32con
 
-driver_path = r"C:\\Users\\home123\\cq\\LGMC\\logitech.driver.dll"
+# driver_path = r"C:\Users\home123\cq\LGMC\logitech.driver.dll"
+driver_path = r"C:\Users\Administrator\PycharmProjects\cq\LGMC\logitech.driver.dll"
 
 class LogitechMouse:
     """
@@ -92,7 +93,7 @@ class CH9350Mouse:
     A class for controlling the mouse using the CH9350 chip.
     This class communicates with CH9350 via a serial interface.
     """
-    def __init__(self, port, baudrate=9600):
+    def __init__(self, port, baudrate=115200):
         """
         Initialize the CH9350 mouse controller.
         :param port: Serial port (e.g., "COM3")

@@ -6,100 +6,19 @@ import numpy as np
 import torch
 import win32api
 import win32con
-import ctypes
 from utils.augmentations import letterbox
 from models.common import DetectMultiBackend
 from utils.general import (LOGGER, check_img_size, cv2, non_max_suppression, xyxy2xywh, scale_coords)
 from utils.torch_utils import select_device, time_sync
-from grabscreen import grab_screen
+from grabscreen import ScreenGrabber
 from PID import PID
 import threading
-# from FPS import FPS  # 导入FPS类
+from kalman import KalmanFilter
+from mouse_controller import LogitechMouse,CH9350Mouse
+from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
-# fps = FPS()
-# Load Logitech Driver DLL globally
-try:
-    driver = ctypes.CDLL(r"C:\Users\Administrator\PycharmProjects\cq\LGMC\logitech.driver.dll")
-    ok = driver.device_open() == 1  # The driver can only be opened once per process
-    if not ok:
-        print('Error, GHUB or LGS driver not found')
-except FileNotFoundError:
-    print(f'Error, DLL file not found')
-
-class Logitech:
-
-    class mouse:
-        """
-        code: 1: Left button, 2: Middle button, 3: Right button
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.mouse_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.mouse_down(code)
-            driver.mouse_up(code)
-
-        @staticmethod
-        def scroll(a):
-            """
-            a: Scroll step, unclear meaning
-            """
-            if not ok:
-                return
-            driver.scroll(a)
-
-        @staticmethod
-        def move(x, y):
-            """
-            Relative movement. For absolute movement, you need to use pywin32's win32gui to calculate positions.
-            pip install pywin32 -i https://pypi.tuna.tsinghua.edu.cn/simple
-            x: Horizontal movement distance and direction, positive to the right, negative to the left
-            y: Vertical movement distance and direction
-            """
-            if not ok:
-                return
-            if x == 0 and y == 0:
-                return
-            driver.moveR(x, y, True)  # Relative movement
-
-    class keyboard:
-        """
-        Keyboard key functions use the corresponding key code.
-        code: 'a'-'z': A-Z, '0'-'9': 0-9, other keys are not specified
-        """
-
-        @staticmethod
-        def press(code):
-            if not ok:
-                return
-            driver.key_down(code)
-
-        @staticmethod
-        def release(code):
-            if not ok:
-                return
-            driver.key_up(code)
-
-        @staticmethod
-        def click(code):
-            if not ok:
-                return
-            driver.key_down(code)
-            driver.key_up(code)
-
+fps = FPS()
+# logitech_mouse = LogitechMouse()
 # Configuration and Constants
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]
@@ -223,44 +142,73 @@ def update_pid_in_background():
     while True:
         load_config()
         time.sleep(1)  # 每 1 秒钟更新一次
+def select_mouse(mouse_type="Logitech"):
+    """Return the appropriate mouse controller based on selection."""
+    if mouse_type == "Logitech":
+        return LogitechMouse()
+    elif mouse_type == "CH9350":
+        return CH9350Mouse()
+    else:
+        raise ValueError("Unsupported mouse type. Choose 'Logitech' or 'CH9350'.")
+
 
 # 启动线程来更新 PID 参数
 pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=True)
 pid_update_thread.start()
 @torch.no_grad()
 def find_target(
-        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
+        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        weights=ROOT / r'C:\Users\home123\cq\onnx\wazi.onnx',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(320, 320),  # inference size (height, width)
+        imgsz=(256, 256),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
-        device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        use_capture_device = True,  # 设置为 True 表示使用采集卡
+        device_index = 0,  # 采集卡索引，默认是0
+        mouse_type="Logitech",  # Add mouse type selection here
 ):
-    load_config()
-    with open('config_double.txt', 'r', encoding="utf-8") as f:
-        config_list = []
-        for config_line in f:
-            # 移除行尾的空白字符并分割每行数据
-            config_line = config_line.strip()
-            if not config_line or config_line.startswith("#"):
-                continue  # 跳过空行和注释行
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    mouse_controller = select_mouse(mouse_type)
+    kf_x = KalmanFilter(
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
 
-            # 去除注释部分
-            index_of_comment = config_line.find("#")
-            if index_of_comment != -1:
-                config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
-
-            # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
-            if '=' in config_line:
-                config_list.append(config_line.split("="))
-    if classes is None:
-        classes = int(config_list[15][1].strip())
+    kf_y = KalmanFilter(
+        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
+        process_noise=1,  # 过程噪声
+        measurement_noise=10,  # 测量噪声
+        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
+        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    )
+    # load_config()
+    # with open('config_double.txt', 'r', encoding="utf-8") as f:
+    #     config_list = []
+    #     for config_line in f:
+    #         # 移除行尾的空白字符并分割每行数据
+    #         config_line = config_line.strip()
+    #         if not config_line or config_line.startswith("#"):
+    #             continue  # 跳过空行和注释行
+    #
+    #         # 去除注释部分
+    #         index_of_comment = config_line.find("#")
+    #         if index_of_comment != -1:
+    #             config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
+    #
+    #         # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
+    #         if '=' in config_line:
+    #             config_list.append(config_line.split("="))
+    # if classes is None:
+    #     classes = int(config_list[15][1].strip())
     global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
@@ -291,7 +239,8 @@ def find_target(
         if pause_aim:
             time.sleep(0.1)
             continue
-        img0 = grab_screen(grab_window_location)
+
+        img0 = grabber.grab_screen(grab_window_location)
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
 
         img = letterbox(img0, imgsz, stride=stride, auto=pt)[0]
@@ -345,16 +294,24 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    final_x = target_xywh_x - screen_x_center
-                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                    # 更新卡尔曼滤波器
+                    kf_x.predict()
+                    kf_y.predict()
+
+                    # 使用卡尔曼滤波器更新目标的坐标
+                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+
+                    final_x = int(filtered_x)
+                    final_y = int(filtered_y)
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    Logitech.mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    mouse_controller.move(pid_x, pid_y)
+                    # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-
         else:
             print(f'No target found')
         # fps.update()

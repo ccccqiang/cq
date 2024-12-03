@@ -14,7 +14,7 @@ from grabscreen import ScreenGrabber
 from PID import PID
 import threading
 from kalman import KalmanFilter
-from mouse_controller import LogitechMouse
+from mouse_controller import LogitechMouse,LogitechKeyboard,CH9350Mouse
 from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
 fps = FPS()
@@ -142,6 +142,15 @@ def update_pid_in_background():
     while True:
         load_config()
         time.sleep(1)  # 每 1 秒钟更新一次
+def select_mouse(mouse_type="Logitech"):
+    """Return the appropriate mouse controller based on selection."""
+    if mouse_type == "Logitech":
+        return LogitechMouse()
+    elif mouse_type == "CH9350":
+        return CH9350Mouse()
+    else:
+        raise ValueError("Unsupported mouse type. Choose 'Logitech' or 'CH9350'.")
+
 
 # 启动线程来更新 PID 参数
 pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=True)
@@ -162,8 +171,10 @@ def find_target(
         dnn=False,  # use OpenCV DNN for ONNX inference
         use_capture_device=False,  # 设置为 True 表示使用采集卡
         device_index=0,  # 采集卡索引，默认是0
+        mouse_type="Logitech",
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    mouse_controller = select_mouse(mouse_type)
     load_config()
     kf_x = KalmanFilter(
         dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
@@ -307,7 +318,8 @@ def find_target(
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    mouse_controller.move(pid_x, pid_y)
+                    # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
 
         else:

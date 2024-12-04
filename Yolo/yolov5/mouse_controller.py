@@ -88,11 +88,17 @@ class LogitechKeyboard:
         self.driver.key_down(code)
         self.driver.key_up(code)
 
+
+import serial
+import time
+
+
 class CH9350Mouse:
     """
     A class for controlling the mouse using the CH9350 chip.
     This class communicates with CH9350 via a serial interface.
     """
+
     def __init__(self, port, baudrate=115200):
         """
         Initialize the CH9350 mouse controller.
@@ -107,21 +113,25 @@ class CH9350Mouse:
             print(f"Error opening serial port: {e}")
             self.ser = None
 
-    def move(self, x, y):
+    def move(self, x, y, wheel=0):
         """
-        Move the mouse relative to its current position using CH9350.
+        Move the mouse relative to its current position in state 2 (relative mode).
         :param x: Horizontal movement, positive is to the right, negative is to the left
         :param y: Vertical movement, positive is downward, negative is upward
+        :param wheel: Wheel movement, default is 0 (no scroll)
         """
         if not self.ser:
             print("Serial connection not initialized")
             return
-        # Ensure x and y are within CH9350's accepted range (-127 to 127)
+        # Ensure x, y, and wheel are within CH9350's accepted range (-127 to 127)
         x = max(-127, min(127, x))
         y = max(-127, min(127, y))
-        # Send the move command to CH9350
-        command = bytearray([0x02, x & 0xFF, y & 0xFF])
-        self.ser.write(command)
+        wheel = max(-127, min(127, wheel))
+
+        # Construct the 7-byte frame for state 2 (relative movement)
+        # Format: [0x57, 0xAB, 0x02, button, x, y, wheel]
+        frame = bytearray([0x57, 0xAB, 0x02, 0x00, x & 0xFF, y & 0xFF, wheel & 0xFF])
+        self.ser.write(frame)
 
     def click(self, button=1):
         """
@@ -150,7 +160,6 @@ class CH9350Mouse:
         if self.ser:
             self.ser.close()
             print("Serial connection closed")
-
 
 # Usage Guide:
 # -------------------------------------------

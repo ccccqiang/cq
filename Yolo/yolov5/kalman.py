@@ -1,42 +1,51 @@
+from filterpy.kalman import KalmanFilter
 import numpy as np
 
 
-class KalmanFilter:
+class KalmanFilterWrapper:
     def __init__(self, dt, process_noise, measurement_noise, initial_estimate, initial_covariance):
         """
-        Kalman Filter initialization
+        使用 filterpy 库的 KalmanFilter 替代自定义实现
 
-        :param dt: Time step
-        :param process_noise: Process noise (Q)
-        :param measurement_noise: Measurement noise (R)
-        :param initial_estimate: Initial state estimate [position, velocity]
-        :param initial_covariance: Initial covariance matrix (P)
+        :param dt: 时间步长
+        :param process_noise: 过程噪声（Q）
+        :param measurement_noise: 测量噪声（R）
+        :param initial_estimate: 初始状态估计 [位置, 速度]
+        :param initial_covariance: 初始协方差矩阵 (P)
         """
-        self.dt = dt  # Time step
-        self.F = np.array([[1, dt], [0, 1]])  # State transition matrix
-        self.H = np.array([[1, 0]])  # Measurement matrix
-        self.Q = np.array([[process_noise, 0], [0, process_noise]])  # Process noise covariance
-        self.R = np.array([[measurement_noise]])  # Measurement noise covariance
-        self.P = initial_covariance  # Initial covariance
-        self.x = initial_estimate  # Initial state estimate
+        # 创建 KalmanFilter 对象
+        self.kf = KalmanFilter(dim_x=2, dim_z=1)
+
+        # 设置状态转移矩阵 (F)，假设只有位置和速度
+        self.kf.F = np.array([[1, dt], [0, 1]])  # 状态转移矩阵
+
+        # 设置测量矩阵 (H)，假设你只测量位置
+        self.kf.H = np.array([[1, 0]])  # 测量矩阵
+
+        # 过程噪声协方差矩阵 (Q)
+        self.kf.Q = np.array([[process_noise, 0], [0, process_noise]])  # 过程噪声
+
+        # 测量噪声协方差矩阵 (R)
+        self.kf.R = np.array([[measurement_noise]])  # 测量噪声
+
+        # 初始协方差矩阵 (P)
+        self.kf.P = initial_covariance
+
+        # 初始状态估计
+        self.kf.x = initial_estimate  # 初始状态估计 [位置, 速度]
 
     def predict(self):
         """
-        Predict the next state (position and velocity) based on the model.
+        使用 filterpy 库进行预测
         """
-        self.x = np.dot(self.F, self.x)  # State prediction
-        self.P = np.dot(np.dot(self.F, self.P), self.F.T) + self.Q  # Covariance prediction
-        return self.x
+        self.kf.predict()  # 调用 filterpy 的 predict 方法
+        return self.kf.x
 
     def update(self, measurement):
         """
-        Update the state estimate based on the new measurement.
+        使用 filterpy 库进行更新
 
-        :param measurement: New measurement (position)
+        :param measurement: 新的测量值（位置）
         """
-        y = measurement - np.dot(self.H, self.x)  # Measurement residual
-        S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R  # Residual covariance
-        K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))  # Kalman gain
-        self.x = self.x + np.dot(K, y)  # State update
-        self.P = self.P - np.dot(np.dot(K, self.H), self.P)  # Covariance update
-        return self.x
+        self.kf.update(measurement)  # 调用 filterpy 的 update 方法
+        return self.kf.x

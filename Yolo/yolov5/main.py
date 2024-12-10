@@ -14,7 +14,7 @@ from grabscreen import ScreenGrabber
 from PID import PID
 from FPS import FPS  # 导入FPS类
 import threading
-from kalman import KalmanFilter
+from kalman import KalmanFilterWrapper
 from mouse_controller import LogitechMouse,LogitechKeyboard,CH9350Mouse
 # 初始化FPS计数器
 fps = FPS()
@@ -180,20 +180,20 @@ def find_target(
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
     mouse_controller = select_mouse(mouse_type)
     global pause_aim, last_f1_state
-    kf_x = KalmanFilter(
-        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
-        process_noise=1,  # 过程噪声
-        measurement_noise=10,  # 测量噪声
-        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
-        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    kf_x = KalmanFilterWrapper(
+        dt=0.005,
+        process_noise=1,
+        measurement_noise=10,
+        initial_estimate=np.array([0, 0]),
+        initial_covariance=np.eye(2)
     )
 
-    kf_y = KalmanFilter(
-        dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
-        process_noise=1,  # 过程噪声
-        measurement_noise=10,  # 测量噪声
-        initial_estimate=np.array([0, 0]),  # 初始估计位置和速度为 0
-        initial_covariance=np.eye(2)  # 初始协方差矩阵
+    kf_y = KalmanFilterWrapper(
+        dt=0.005,
+        process_noise=1,
+        measurement_noise=10,
+        initial_estimate=np.array([0, 0]),
+        initial_covariance=np.eye(2)
     )
 
     # Load model
@@ -287,7 +287,7 @@ def find_target(
                     kf_x.predict()
                     kf_y.predict()
 
-                    # 使用卡尔曼滤波器更新目标的坐标
+                    # 更新
                     filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
                     filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
 

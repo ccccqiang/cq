@@ -88,11 +88,13 @@ class LogitechKeyboard:
         self.driver.key_down(code)
         self.driver.key_up(code)
 
+
 class CH9350Mouse:
     """
     A class for controlling the mouse using the CH9350 chip.
     This class communicates with CH9350 via a serial interface.
     """
+
     def __init__(self, port, baudrate=115200):
         """
         Initialize the CH9350 mouse controller.
@@ -119,8 +121,14 @@ class CH9350Mouse:
         # Ensure x and y are within CH9350's accepted range (-127 to 127)
         x = max(-127, min(127, x))
         y = max(-127, min(127, y))
-        # Send the move command to CH9350
-        command = bytearray([0x02, x & 0xFF, y & 0xFF])
+
+        # Build the message following the format 57 AB 02 00 0A 05 00
+        # Here 57, AB are likely fixed header bytes, 02 could be the command type (e.g., "move"),
+        # followed by parameters for movement, and the final byte could be some sort of checksum or end byte.
+
+        command = bytearray([0x57, 0xAB, 0x02, 0x00, x & 0xFF, y & 0xFF, 0x00])
+
+        # Send the command to CH9350
         self.ser.write(command)
 
     def click(self, button=1):
@@ -131,17 +139,16 @@ class CH9350Mouse:
         if not self.ser:
             print("Serial connection not initialized")
             return
-        # Map button to CH9350 protocol
+        # Define command format for click (similar to the move function)
         if button == 1:
-            # Left-click
-            self.ser.write(bytearray([0x03, 0x01]))
-            time.sleep(0.1)
-            self.ser.write(bytearray([0x03, 0x00]))
+            # Left-click: 57 AB 03 00 01 00
+            command = bytearray([0x57, 0xAB, 0x03, 0x00, 0x01, 0x00, 0x00])
         elif button == 2:
-            # Right-click
-            self.ser.write(bytearray([0x03, 0x02]))
-            time.sleep(0.1)
-            self.ser.write(bytearray([0x03, 0x00]))
+            # Right-click: 57 AB 03 00 02 00
+            command = bytearray([0x57, 0xAB, 0x03, 0x00, 0x02, 0x00, 0x00])
+
+        # Send the click command to CH9350
+        self.ser.write(command)
 
     def close(self):
         """

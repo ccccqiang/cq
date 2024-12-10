@@ -142,7 +142,7 @@ def update_pid_in_background():
     while True:
         load_config()
         time.sleep(1)  # 每 1 秒钟更新一次
-def select_mouse(mouse_type="Logitech", port="COM3", baudrate=115200):
+def select_mouse(mouse_type="Logitech", port="COM6", baudrate=115200):
     """Return the appropriate mouse controller based on selection."""
     if mouse_type == "Logitech":
         return LogitechMouse()
@@ -166,16 +166,16 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        classes=[1],  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        use_capture_device = True,  # 设置为 True 表示使用采集卡
+        use_capture_device = False,  # 设置为 True 表示使用采集卡
         device_index = 0,  # 采集卡索引，默认是0
         mouse_type="CH9350",  # Add mouse type selection here
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
-    mouse_controller = select_mouse(mouse_type, port="COM3", baudrate=115200)
+    mouse_controller = select_mouse(mouse_type, port="COM6", baudrate=115200)
     kf_x = KalmanFilter(
         dt=0.005,  # 假设每个预测时间间隔为 0.1 秒
         process_noise=1,  # 过程噪声
@@ -230,7 +230,7 @@ def find_target(
     print(f"imgz = {imgsz}")
 
     while True:
-        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_RSHIFT) & 0x8000
         if current_f1_state and not last_f1_state:
             pause_aim = not pause_aim
             print(f"Aim {'Stop' if pause_aim else 'Start'}")
@@ -242,7 +242,10 @@ def find_target(
             continue
 
         img0 = grabber.grab_screen(grab_window_location)
+        # print(f"Grabbed image shape: {img0.shape}, location: {grab_window_location}")
+
         img0 = cv2.cvtColor(img0, cv2.COLOR_BGRA2BGR)
+
 
         img = letterbox(img0, imgsz, stride=stride, auto=pt)[0]
         img = img.transpose((2, 0, 1))[::-1]
@@ -275,7 +278,7 @@ def find_target(
 
             target_xywh_x = target_xywh[0] + edge_x
             target_xywh_y = target_xywh[1] + edge_y
-            print('\033[0;33;40m' + f"target-X = {target_xywh_x}  target—Y = {target_xywh_y}" + '\033[0m')
+            # print('\033[0;33;40m' + f"target-X = {target_xywh_x}  target—Y = {target_xywh_y}" + '\033[0m')
             if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
 
                 if configs_dict[12] == 3:
@@ -295,16 +298,26 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    # 更新卡尔曼滤波器
-                    kf_x.predict()
-                    kf_y.predict()
-
-                    # 使用卡尔曼滤波器更新目标的坐标
-                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
-                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
-
-                    final_x = int(filtered_x)
-                    final_y = int(filtered_y)
+                    # # 更新卡尔曼滤波器
+                    # kf_x.predict()
+                    # kf_y.predict()
+                    #
+                    # # 使用卡尔曼滤波器更新目标的坐标
+                    # filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    # filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+                    #
+                    # final_x = int(filtered_x)
+                    # final_y = int(filtered_y)
+                    #
+                    # pid_x = int(pid.calculate(final_x, 0))
+                    # pid_y = int(pid.calculate(final_y, 0))
+                    #
+                    # # Move the mouse
+                    # mouse_controller.move(pid_x, pid_y)
+                    # # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                    final_x = target_xywh_x - screen_x_center
+                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
@@ -312,9 +325,9 @@ def find_target(
                     # Move the mouse
                     mouse_controller.move(pid_x, pid_y)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
-                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-        else:
-            print(f'No target found')
+                    # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+        # else:
+            # print(f'No target found')
         # fps.update()
 if __name__ == "__main__":
     find_target()

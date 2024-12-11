@@ -89,10 +89,6 @@ class LogitechKeyboard:
         self.driver.key_up(code)
 
 
-import serial
-import time
-
-
 class CH9350Mouse:
     """
     A class for controlling the mouse using the CH9350 chip.
@@ -113,25 +109,27 @@ class CH9350Mouse:
             print(f"Error opening serial port: {e}")
             self.ser = None
 
-    def move(self, x, y, wheel=0):
+    def move(self, x, y):
         """
-        Move the mouse relative to its current position in state 2 (relative mode).
+        Move the mouse relative to its current position using CH9350.
         :param x: Horizontal movement, positive is to the right, negative is to the left
         :param y: Vertical movement, positive is downward, negative is upward
-        :param wheel: Wheel movement, default is 0 (no scroll)
         """
         if not self.ser:
             print("Serial connection not initialized")
             return
-        # Ensure x, y, and wheel are within CH9350's accepted range (-127 to 127)
+        # Ensure x and y are within CH9350's accepted range (-127 to 127)
         x = max(-127, min(127, x))
         y = max(-127, min(127, y))
-        wheel = max(-127, min(127, wheel))
 
-        # Construct the 7-byte frame for state 2 (relative movement)
-        # Format: [0x57, 0xAB, 0x02, button, x, y, wheel]
-        frame = bytearray([0x57, 0xAB, 0x02, 0x00, x & 0xFF, y & 0xFF, wheel & 0xFF])
-        self.ser.write(frame)
+        # Build the message following the format 57 AB 02 00 0A 05 00
+        # Here 57, AB are likely fixed header bytes, 02 could be the command type (e.g., "move"),
+        # followed by parameters for movement, and the final byte could be some sort of checksum or end byte.
+
+        command = bytearray([0x57, 0xAB, 0x02, 0x00, x & 0xFF, y & 0xFF, 0x00])
+
+        # Send the command to CH9350
+        self.ser.write(command)
 
     def click(self, button=1):
         """
@@ -141,17 +139,16 @@ class CH9350Mouse:
         if not self.ser:
             print("Serial connection not initialized")
             return
-        # Map button to CH9350 protocol
+        # Define command format for click (similar to the move function)
         if button == 1:
-            # Left-click
-            self.ser.write(bytearray([0x03, 0x01]))
-            time.sleep(0.1)
-            self.ser.write(bytearray([0x03, 0x00]))
+            # Left-click: 57 AB 03 00 01 00
+            command = bytearray([0x57, 0xAB, 0x03, 0x00, 0x01, 0x00, 0x00])
         elif button == 2:
-            # Right-click
-            self.ser.write(bytearray([0x03, 0x02]))
-            time.sleep(0.1)
-            self.ser.write(bytearray([0x03, 0x00]))
+            # Right-click: 57 AB 03 00 02 00
+            command = bytearray([0x57, 0xAB, 0x03, 0x00, 0x02, 0x00, 0x00])
+
+        # Send the click command to CH9350
+        self.ser.write(command)
 
     def close(self):
         """
@@ -160,6 +157,7 @@ class CH9350Mouse:
         if self.ser:
             self.ser.close()
             print("Serial connection closed")
+
 
 # Usage Guide:
 # -------------------------------------------

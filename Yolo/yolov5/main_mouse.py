@@ -18,7 +18,7 @@ from mouse_controller import LogitechMouse,LogitechKeyboard,CH9350Mouse
 from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
 fps = FPS()
-logitech_mouse = LogitechMouse()
+# logitech_mouse = LogitechMouse()
 # Configuration and Constants
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]
@@ -165,7 +165,7 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        classes=[1],  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
@@ -218,7 +218,7 @@ def find_target(
 
     bs = 1  # batch_size
     model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))
-    time.sleep(0.5)
+    time.sleep(0.05)
 
     # t1 = time_sync()
 
@@ -229,7 +229,7 @@ def find_target(
     print(f"imgz = {imgsz}")
 
     while True:
-        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_RSHIFT) & 0x8000
         if current_f1_state and not last_f1_state:
             pause_aim = not pause_aim
             print(f"Aim {'Stop' if pause_aim else 'Start'}")

@@ -158,7 +158,7 @@ pid_update_thread.start()
 @torch.no_grad()
 def find_target(
         weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / r'C:\Users\home123\cq\pythonDXGI\py3.9\onnx\valorant-n-3.pt',  # model.pt path(s)
+        # weights=ROOT / r'C:\Users\Administrator\PycharmProjects\cq\onnx\csbest_fp16.engine',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -320,10 +320,10 @@ def find_target(
                     # Move the mouse
                     mouse_controller.move(pid_x, pid_y)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
-                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-
-        else:
-            print(f'No target found')
-        # fps.update()
+        #             print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+        #
+        # else:
+        #     print(f'No target found')
+        fps.update()
 if __name__ == "__main__":
     find_target()

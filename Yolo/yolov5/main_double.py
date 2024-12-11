@@ -231,7 +231,7 @@ def find_target(
     print(f"imgz = {imgsz}")
 
     while True:
-        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        current_f1_state = win32api.GetAsyncKeyState(win32con.VK_RSHIFT) & 0x8000
         if current_f1_state and not last_f1_state:
             pause_aim = not pause_aim
             print(f"Aim {'Stop' if pause_aim else 'Start'}")

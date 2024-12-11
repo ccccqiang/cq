@@ -2,8 +2,8 @@
 # 范围调节
 1. y_correction_factor = 10
 
-2. screen_x = 1920
-3. screen_y = 1080
+2. screen_x = 1280
+3. screen_y = 960
 
 4. window_x = 320
 5. window_y = 320

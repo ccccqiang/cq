@@ -6,7 +6,7 @@ from PIL import Image
 model_path = r"C:\Users\home123\cq\onnx\csbest.pt"
 
 # 图像路径
-image_path = r"C:\Users\home123\Downloads\_cgi-bin_mmwebwx-bin_webwxgetmsgimg__&MsgID=5890170185683978284&skey=@crypt_81641f91_487915f3b2e7bfe8431b5f83fa8f07c5&mmweb_appid=wx_webfilehelper.jpg"
+image_path = r"C:\Users\home123\Downloads\_cgi-bin_mmwebwx-bin_webwxgetmsgimg__&MsgID=1690952690285011070&skey=@crypt_81641f91_c3ef2c61804dff87b9f81a8cd32b2bb1&mmweb_appid=wx_webfilehelper.jpg"
 
 # 加载 YOLOv5 模型
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path)  # 加载自定义模型

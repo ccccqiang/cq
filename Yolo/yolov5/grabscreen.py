@@ -4,11 +4,6 @@ import win32gui, win32ui, win32con, win32api
 
 class ScreenGrabber:
     def __init__(self, use_capture_device=False, device_index=0):
-        """
-        初始化屏幕抓取工具或采集卡
-        :param use_capture_device: 是否使用采集卡
-        :param device_index: 采集卡索引（默认为0）
-        """
         self.use_capture_device = use_capture_device
         self.device_index = device_index
         if self.use_capture_device:
@@ -17,17 +12,19 @@ class ScreenGrabber:
                 raise ValueError(f"Unable to open capture device {self.device_index}")
 
     def grab_screen(self, region=None):
-        """
-        屏幕抓取函数
-        :param region: (left, top, right, bottom) 矩形区域
-        :return: 图像
-        """
         if self.use_capture_device:
-            # 从采集卡获取帧
             ret, frame = self.cap.read()
             if not ret:
                 raise RuntimeError("Failed to grab frame from capture device")
+            if region:
+                # 裁剪到指定区域
+                left, top, right, bottom = region
+                frame = frame[top:bottom, left:right]
             return frame
+
+        # 屏幕抓取逻辑
+        # ...（省略其他代码）
+
 
         # 屏幕抓取逻辑
         hwin = win32gui.GetDesktopWindow()

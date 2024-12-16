@@ -170,11 +170,12 @@ def find_target(
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        device_fps=60,
         use_capture_device = True,  # 设置为 True 表示使用采集卡
         device_index = 0,  # 采集卡索引，默认是0
         mouse_type="CH9350",  # Add mouse type selection here
 ):
-    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index, device_fps=device_fps)
     mouse_controller = select_mouse(mouse_type, port="COM3", baudrate=115200)
     kf_x = KalmanFilterWrapper(
         dt=0.005,

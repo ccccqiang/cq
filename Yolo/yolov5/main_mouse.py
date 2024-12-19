@@ -165,7 +165,7 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=[3],  # filter by class: --class 0, or --class 0 2 3
+        classes=[1],  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
@@ -318,7 +318,7 @@ def find_target(
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    mouse_controller.move(pid_x, pid_y)
+                    mouse_controller.move(pid_x, 0)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
         #             print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         #

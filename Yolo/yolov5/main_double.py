@@ -142,7 +142,7 @@ def update_pid_in_background():
     while True:
         load_config()
         time.sleep(1)  # 每 1 秒钟更新一次
-def select_mouse(mouse_type="Logitech", port="COM3", baudrate=115200):
+def select_mouse(mouse_type="Logitech", port="COM6", baudrate=115200):
     """Return the appropriate mouse controller based on selection."""
     if mouse_type == "Logitech":
         return LogitechMouse()
@@ -166,7 +166,7 @@ def find_target(
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
         device="0",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        classes=[1,3],  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
@@ -175,10 +175,10 @@ def find_target(
         device_index = 0,  # 采集卡索引，默认是0
         mouse_type="CH9350",  # Add mouse type selection here
 ):
-    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index, device_fps=device_fps)
-    mouse_controller = select_mouse(mouse_type, port="COM3", baudrate=115200)
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
+    mouse_controller = select_mouse(mouse_type, port="COM6", baudrate=115200)
     kf_x = KalmanFilterWrapper(
-        dt=0.005,
+        dt=0.0000000005,
         process_noise=1,
         measurement_noise=10,
         initial_estimate=np.array([0, 0]),
@@ -186,32 +186,14 @@ def find_target(
     )
 
     kf_y = KalmanFilterWrapper(
-        dt=0.005,
+        dt=0.0000000005,
         process_noise=1,
         measurement_noise=10,
         initial_estimate=np.array([0, 0]),
         initial_covariance=np.eye(2)
     )
 
-    # load_config()
-    # with open('config_double.txt', 'r', encoding="utf-8") as f:
-    #     config_list = []
-    #     for config_line in f:
-    #         # 移除行尾的空白字符并分割每行数据
-    #         config_line = config_line.strip()
-    #         if not config_line or config_line.startswith("#"):
-    #             continue  # 跳过空行和注释行
-    #
-    #         # 去除注释部分
-    #         index_of_comment = config_line.find("#")
-    #         if index_of_comment != -1:
-    #             config_line = config_line[:index_of_comment].strip()  # 只保留代码部分
-    #
-    #         # 如果这一行包含配置项（如 'key = value'），我们将其拆分并存储
-    #         if '=' in config_line:
-    #             config_list.append(config_line.split("="))
-    # if classes is None:
-    #     classes = int(config_list[15][1].strip())
+
     global pause_aim, last_f1_state
     # Load model
     device = select_device(device)
@@ -297,16 +279,8 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    # 更新卡尔曼滤波器
-                    kf_x.predict()
-                    kf_y.predict()
-
-                    # 使用卡尔曼滤波器更新目标的坐标
-                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
-                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
-
-                    final_x = int(filtered_x)
-                    final_y = int(filtered_y)
+                    final_x = target_xywh_x - screen_x_center
+                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
@@ -315,6 +289,24 @@ def find_target(
                     mouse_controller.move(pid_x, pid_y)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                    # 更新卡尔曼滤波器
+                    # kf_x.predict()
+                    # kf_y.predict()
+                    #
+                    # # 使用卡尔曼滤波器更新目标的坐标
+                    # filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    # filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+                    #
+                    # final_x = int(filtered_x)
+                    # final_y = int(filtered_y)
+                    #
+                    # pid_x = int(pid.calculate(final_x, 0))
+                    # pid_y = int(pid.calculate(final_y, 0))
+                    #
+                    # # Move the mouse
+                    # mouse_controller.move(pid_x, pid_y)
+                    # # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         else:
             print(f'No target found')
         # fps.update()

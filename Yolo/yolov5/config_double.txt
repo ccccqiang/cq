@@ -2,8 +2,8 @@
 # 范围调节
 1. y_correction_factor = 10
 
-2. screen_x = 1280
-3. screen_y = 960
+2. screen_x = 1920
+3. screen_y = 1080
 
 4. window_x = 320
 5. window_y = 320
@@ -14,14 +14,14 @@
 8. Ki = 0.001
 9. Kd = 0.0000005
 
-10. y_portion = 0.2
+10. y_portion = 0.4
 
 11. max_step = 30
 
 12. aim_mod = 0
 
-13. aim_width = 150
-14. aim_width = 300
+13. aim_width = 50
+14. aim_width = 50
 15. classes = 1
 
 

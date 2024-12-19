@@ -3,29 +3,32 @@ import numpy as np
 import win32gui, win32ui, win32con, win32api
 
 class ScreenGrabber:
-    def __init__(self, use_capture_device=False, device_index=0,device_fps=60):
+    def __init__(self, use_capture_device=False, device_index=0):
         self.use_capture_device = use_capture_device
         self.device_index = device_index
-        self.device_fps = device_fps
+        # self.device_fps = device_fps
         if self.use_capture_device:
             self.cap = cv2.VideoCapture(self.device_index)
             if not self.cap.isOpened():
                 raise ValueError(f"Unable to open capture device {self.device_index}")
-        self.cap.set(cv2.CAP_PROP_FPS, self.device_fps)  # 设置帧率
+        # self.cap.set(cv2.CAP_PROP_FPS, self.device_fps)  # 设置帧率
 
     def grab_screen(self, region=None):
         if self.use_capture_device:
             ret, frame = self.cap.read()
             if not ret:
                 raise RuntimeError("Failed to grab frame from capture device")
-            if region:
-                # 裁剪到指定区域
-                left, top, right, bottom = region
-                width, height = right - left, bottom - top
-                print("left:", left, "top:", top, "width:", width, "height:", height)
-                frame = frame[top:bottom, left:right]
-            cv2.imshow('Image', frame)
-            cv2.waitKey(0)  # 按任意键关闭窗口
+            height, width, _ = frame.shape
+            crop_size = 320
+            center_x, center_y = width // 2, height // 2
+            left = center_x - crop_size // 2
+            top = center_y - crop_size // 2
+            right = center_x + crop_size // 2
+            bottom = center_y + crop_size // 2
+            # print("Center Crop -> left:", left, "top:", top, "right:", right, "bottom:", bottom)
+            frame = frame[top:bottom, left:right]
+            # cv2.imshow('Image', frame)
+            # cv2.waitKey(0)  # 按任意键关闭窗口
             return frame
 
         # 屏幕抓取逻辑
@@ -38,7 +41,7 @@ class ScreenGrabber:
             left, top, x2, y2 = region
             width = x2 - left
             height = y2 - top
-            print("left:", left, "top:", top, "width:", width, "height:", height)
+            # print("left:", left, "top:", top, "width:", width, "height:", height)
         else:
             width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
             height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
@@ -60,8 +63,8 @@ class ScreenGrabber:
         memdc.DeleteDC()
         win32gui.ReleaseDC(hwin, hwindc)
         win32gui.DeleteObject(bmp.GetHandle())
-        cv2.imshow('Image', img)
-        cv2.waitKey(0)  # 按任意键关闭窗口
+        # cv2.imshow('Image', img)
+        # cv2.waitKey(0)  # 按任意键关闭窗口
         return img
 
     def release(self):
@@ -70,4 +73,4 @@ class ScreenGrabber:
         """
         if self.use_capture_device:
             self.cap.release()
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()

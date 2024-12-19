@@ -3,7 +3,7 @@ import os
 
 app = Flask(__name__)
 
-CONFIG_FILE = 'configs.txt'
+CONFIG_FILE = 'config_double.txt'
 
 # 读取配置文件
 def load_config():

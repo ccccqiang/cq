@@ -287,7 +287,7 @@ def find_target(
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    mouse_controller.move(pid_x, 0)
+                    mouse_controller.move(pid_x, pid_y)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
                     # 更新卡尔曼滤波器

@@ -126,9 +126,33 @@ def load_config():
         window_x, window_y = float(config_list[4][1].strip()),float(config_list[5][1].strip())
         y_portion = float(config_list[10][1].strip())
         classes = int(config_list[15][1].strip())
+
+        # 读取 Kalman 滤波器参数
+        kf_dt = float(config_list[16][1].strip())  # 假设 Kalman 参数在第 15 行
+        kf_process_noise = float(config_list[17][1].strip())  # 过程噪声
+        kf_measurement_noise = float(config_list[18][1].strip())  # 测量噪声
+        kf_initial_estimate_x = float(config_list[19][1].strip())  # 初始估计 x
+        kf_initial_estimate_y = float(config_list[20][1].strip())  # 初始估计 y
+        kf_initial_covariance = float(config_list[21][1].strip())  # 初始协方差
+
     except IndexError:
         # print("配置文件格式错误，无法解析 PID 参数。")
         return
+    kf_x = KalmanFilterWrapper(
+        dt=kf_dt,
+        process_noise=kf_process_noise,
+        measurement_noise=kf_measurement_noise,
+        initial_estimate=np.array([kf_initial_estimate_x, 0]),
+        initial_covariance=np.eye(2) * kf_initial_covariance
+    )
+
+    kf_y = KalmanFilterWrapper(
+        dt=kf_dt,
+        process_noise=kf_process_noise,
+        measurement_noise=kf_measurement_noise,
+        initial_estimate=np.array([kf_initial_estimate_y, 0]),
+        initial_covariance=np.eye(2) * kf_initial_covariance
+    )
 
     pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)  # 更新 PID 控制器
     screen_x,screen_y = screen_x,screen_y
@@ -176,21 +200,6 @@ def find_target(
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
     mouse_controller = select_mouse(mouse_type)
     load_config()
-    kf_x = KalmanFilterWrapper(
-        dt=0.005,
-        process_noise=1,
-        measurement_noise=10,
-        initial_estimate=np.array([0, 0]),
-        initial_covariance=np.eye(2)
-    )
-
-    kf_y = KalmanFilterWrapper(
-        dt=0.005,
-        process_noise=1,
-        measurement_noise=10,
-        initial_estimate=np.array([0, 0]),
-        initial_covariance=np.eye(2)
-    )
     # with open('configs.txt', 'r', encoding="utf-8") as f:
     #     config_list = []
     #     for config_line in f:

@@ -23,7 +23,12 @@
 13. aim_width = 50
 14. aim_width = 50
 15. classes = 1
-
+16. kf_dt = 0.005
+17. kf_process_noise = 1
+18. kf_measurement_noise = 10
+19. kf_initial_estimate_x = 0
+20. kf_initial_estimate_y = 0
+21. kf_initial_covariance = 1
 
 
 

@@ -15,9 +15,9 @@ from PID import PID
 import threading
 from kalman import KalmanFilterWrapper
 from mouse_controller import LogitechMouse,CH9350Mouse
-from FPS import FPS  # 导入FPS类
+# from FPS import FPS  # 导入FPS类
 # 初始化FPS计数器
-fps = FPS()
+# fps = FPS()
 # logitech_mouse = LogitechMouse()
 # Configuration and Constants
 FILE = Path(__file__).resolve()
@@ -158,11 +158,11 @@ pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=Tru
 pid_update_thread.start()
 @torch.no_grad()
 def find_target(
-        weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
+        # weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
         # weights=ROOT / 'csbest_fp16.engine',  # model.pt path(s)
-        # weights=ROOT / r'C:\Users\home123\cq\onnx\wazi.onnx',  # model.pt path(s)
+        weights=ROOT / r'C:\Users\Administrator\PycharmProjects\cq\Yolo\yolov5\wazi_fp16.engine',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(320, 320),  # inference size (height, width)
+        imgsz=(256, 256),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=10,  # maximum detections per image
@@ -171,12 +171,11 @@ def find_target(
         agnostic_nms=False,  # class-agnostic NMS
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        device_fps=120, # 采集卡帧率
         use_capture_device = True,  # 设置为 True 表示使用采集卡
         device_index = 0,  # 采集卡索引，默认是0
         mouse_type="CH9350",  # Add mouse type selection here
 ):
-    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index,device_fps=device_fps)
+    grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index,)
     mouse_controller = select_mouse(mouse_type, port="COM6", baudrate=115200)
     kf_x = KalmanFilterWrapper(
         dt=0.0000000005,
@@ -308,8 +307,8 @@ def find_target(
                     # mouse_controller.move(pid_x, pid_y)
                     # # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-        else:
-            print(f'No target found')
-        fps.update()
+        # else:
+        #     print(f'No target found')
+        # fps.update()
 if __name__ == "__main__":
     find_target()

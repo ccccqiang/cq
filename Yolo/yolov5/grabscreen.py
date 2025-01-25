@@ -3,17 +3,15 @@ import numpy as np
 import win32gui, win32ui, win32con, win32api
 
 class ScreenGrabber:
-    def __init__(self, use_capture_device=False, device_index=0, device_fps=120):
+    def __init__(self, use_capture_device=False, device_index=0):
         self.use_capture_device = use_capture_device
         self.device_index = device_index
-        self.device_fps = device_fps
+        # self.device_fps = device_fps
 
         if self.use_capture_device:
             self.cap = cv2.VideoCapture(self.device_index)
             if not self.cap.isOpened():
                 raise ValueError(f"Unable to open capture device {self.device_index}")
-            # 只有在使用采集卡时，才设置帧率
-            self.cap.set(cv2.CAP_PROP_FPS, self.device_fps)
 
     def grab_screen(self, region=None):
         if self.use_capture_device:

@@ -182,7 +182,7 @@ pid_update_thread.start()
 @torch.no_grad()
 def find_target(
         weights=ROOT / 'cs2_fp16.engine',  # model.pt path(s) 选择自己的模型
-        # weights=ROOT / r'C:\Users\Administrator\PycharmProjects\cq\onnx\csbest_fp16.engine',  # model.pt path(s)
+        # weights=ROOT / csbest_fp16.engine',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -303,31 +303,31 @@ def find_target(
 
                 if aim_mouse:
                     # 更新卡尔曼滤波器
-                    # kf_x.predict()
-                    # kf_y.predict()
-                    #
-                    # # 使用卡尔曼滤波器更新目标的坐标
-                    # filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
-                    # filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
-                    #
-                    # final_x = int(filtered_x)
-                    # final_y = int(filtered_y)
-                    #
-                    # pid_x = int(pid.calculate(final_x, 0))
-                    # pid_y = int(pid.calculate(final_y, 0))
-                    #
-                    # # Move the mouse
-                    # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
-                    # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                    kf_x.predict()
+                    kf_y.predict()
 
-                    final_x = target_xywh_x - screen_x_center
-                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                    # 使用卡尔曼滤波器更新目标的坐标
+                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+
+                    final_x = int(filtered_x)
+                    final_y = int(filtered_y)
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    mouse_controller.move(pid_x, 0)
+                    mouse_controller.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+
+                    # final_x = target_xywh_x - screen_x_center
+                    # final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                    #
+                    # pid_x = int(pid.calculate(final_x, 0))
+                    # pid_y = int(pid.calculate(final_y, 0))
+
+                    # Move the mouse
+                    # mouse_controller.move(pid_x, 0)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
         #             print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         #

@@ -1,5 +1,5 @@
+import socket
 from flask import Flask, render_template, request, redirect, url_for
-import os
 
 app = Flask(__name__)
 
@@ -65,5 +65,22 @@ def index():
     configs = load_config()  # 读取配置文件
     return render_template('index.html', configs=configs)
 
+def get_local_ip():
+    # 获取本机的局域网 IP 地址
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # 尝试连接到外部服务器（如 Google DNS），然后获取本机 IP 地址
+        s.connect(('8.8.8.8', 80))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = '127.0.0.1'  # 如果无法获取外部 IP，则默认使用本地回环地址
+    finally:
+        s.close()
+    return local_ip
+
 if __name__ == "__main__":
-    app.run(host='192.168.124.5', port=5000)
+    # 获取局域网 IP 地址
+    local_ip = get_local_ip()
+    print(f"正在使用本地 IP 地址 {local_ip} 进行服务")
+    app.run(host=local_ip, port=5000)

@@ -127,13 +127,13 @@ def load_config():
         y_portion = float(config_list[10][1].strip())
         classes = int(config_list[15][1].strip())
 
-        # 读取 Kalman 滤波器参数
-        kf_dt = float(config_list[16][1].strip())  # 假设 Kalman 参数在第 15 行
-        kf_process_noise = float(config_list[17][1].strip())  # 过程噪声
-        kf_measurement_noise = float(config_list[18][1].strip())  # 测量噪声
-        kf_initial_estimate_x = float(config_list[19][1].strip())  # 初始估计 x
-        kf_initial_estimate_y = float(config_list[20][1].strip())  # 初始估计 y
-        kf_initial_covariance = float(config_list[21][1].strip())  # 初始协方差
+        # # 读取 Kalman 滤波器参数
+        # kf_dt = float(config_list[16][1].strip())  # 假设 Kalman 参数在第 15 行
+        # kf_process_noise = float(config_list[17][1].strip())  # 过程噪声
+        # kf_measurement_noise = float(config_list[18][1].strip())  # 测量噪声
+        # kf_initial_estimate_x = float(config_list[19][1].strip())  # 初始估计 x
+        # kf_initial_estimate_y = float(config_list[20][1].strip())  # 初始估计 y
+        # kf_initial_covariance = float(config_list[21][1].strip())  # 初始协方差
 
     except IndexError:
         # print("配置文件格式错误，无法解析 PID 参数。")
@@ -301,34 +301,34 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    # 更新卡尔曼滤波器
-                    kf_x.predict()
-                    kf_y.predict()
+                    # # 更新卡尔曼滤波器
+                    # kf_x.predict()
+                    # kf_y.predict()
+                    #
+                    # # 使用卡尔曼滤波器更新目标的坐标
+                    # filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    # filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+                    #
+                    # final_x = int(filtered_x)
+                    # final_y = int(filtered_y)
+                    #
+                    # pid_x = int(pid.calculate(final_x, 0))
+                    # pid_y = int(pid.calculate(final_y, 0))
+                    #
+                    # # Move the mouse
+                    # mouse_controller.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
 
-                    # 使用卡尔曼滤波器更新目标的坐标
-                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
-                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
-
-                    final_x = int(filtered_x)
-                    final_y = int(filtered_y)
+                    final_x = target_xywh_x - screen_x_center
+                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
 
                     pid_x = int(pid.calculate(final_x, 0))
                     pid_y = int(pid.calculate(final_y, 0))
 
                     # Move the mouse
-                    mouse_controller.move(pid_x, pid_y)  # Call Logitech mouse move method
-                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-
-                    # final_x = target_xywh_x - screen_x_center
-                    # final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
-                    #
-                    # pid_x = int(pid.calculate(final_x, 0))
-                    # pid_y = int(pid.calculate(final_y, 0))
-
-                    # Move the mouse
-                    # mouse_controller.move(pid_x, 0)
+                    mouse_controller.move(pid_x, 0)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
-        #             print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         #
         # else:
         #     print(f'No target found')

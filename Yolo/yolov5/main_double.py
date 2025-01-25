@@ -178,7 +178,7 @@ def find_target(
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index,)
     mouse_controller = select_mouse(mouse_type, port="COM6", baudrate=115200)
     kf_x = KalmanFilterWrapper(
-        dt=0.0000000005,
+        dt=3.2,
         process_noise=1,
         measurement_noise=10,
         initial_estimate=np.array([0, 0]),
@@ -186,7 +186,7 @@ def find_target(
     )
 
     kf_y = KalmanFilterWrapper(
-        dt=0.0000000005,
+        dt=3.2,
         process_noise=1,
         measurement_noise=10,
         initial_estimate=np.array([0, 0]),
@@ -279,34 +279,34 @@ def find_target(
                     break
 
                 if aim_mouse:
-                    final_x = target_xywh_x - screen_x_center
-                    final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
-
-                    pid_x = int(pid.calculate(final_x, 0))
-                    pid_y = int(pid.calculate(final_y, 0))
-
-                    # Move the mouse
-                    mouse_controller.move(pid_x, 0)
-                    # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
-                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
-                    # 更新卡尔曼滤波器
-                    # kf_x.predict()
-                    # kf_y.predict()
-                    #
-                    # # 使用卡尔曼滤波器更新目标的坐标
-                    # filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
-                    # filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
-                    #
-                    # final_x = int(filtered_x)
-                    # final_y = int(filtered_y)
+                    # final_x = target_xywh_x - screen_x_center
+                    # final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
                     #
                     # pid_x = int(pid.calculate(final_x, 0))
                     # pid_y = int(pid.calculate(final_y, 0))
                     #
                     # # Move the mouse
-                    # mouse_controller.move(pid_x, pid_y)
+                    # mouse_controller.move(pid_x, 0)
                     # # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
+                    # 更新卡尔曼滤波器
+                    kf_x.predict()
+                    kf_y.predict()
+
+                    # 使用卡尔曼滤波器更新目标的坐标
+                    filtered_x = kf_x.update(target_xywh_x - screen_x_center)[0]
+                    filtered_y = kf_y.update(target_xywh_y - screen_y_center - y_portion * target_xywh[3])[0]
+
+                    final_x = int(filtered_x)
+                    final_y = int(filtered_y)
+
+                    pid_x = int(pid.calculate(final_x, 0))
+                    pid_y = int(pid.calculate(final_y, 0))
+
+                    # Move the mouse
+                    mouse_controller.move(pid_x, pid_y)
+                    # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
+                    print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         # else:
         #     print(f'No target found')
         # fps.update()

@@ -138,22 +138,6 @@ def load_config():
     except IndexError:
         # print("配置文件格式错误，无法解析 PID 参数。")
         return
-    kf_x = KalmanFilterWrapper(
-        dt=kf_dt,
-        process_noise=kf_process_noise,
-        measurement_noise=kf_measurement_noise,
-        initial_estimate=np.array([kf_initial_estimate_x, 0]),
-        initial_covariance=np.eye(2) * kf_initial_covariance
-    )
-
-    kf_y = KalmanFilterWrapper(
-        dt=kf_dt,
-        process_noise=kf_process_noise,
-        measurement_noise=kf_measurement_noise,
-        initial_estimate=np.array([kf_initial_estimate_y, 0]),
-        initial_covariance=np.eye(2) * kf_initial_covariance
-    )
-
     pid = PID(PID_time, max_step, -max_step, Kp, Ki, Kd)  # 更新 PID 控制器
     screen_x,screen_y = screen_x,screen_y
     y_portion = y_portion
@@ -199,6 +183,21 @@ def find_target(
 ):
     grabber = ScreenGrabber(use_capture_device=use_capture_device, device_index=device_index)
     mouse_controller = select_mouse(mouse_type)
+    kf_x = KalmanFilterWrapper(
+        dt=0.0000000005,
+        process_noise=1,
+        measurement_noise=10,
+        initial_estimate=np.array([0, 0]),
+        initial_covariance=np.eye(2)
+    )
+
+    kf_y = KalmanFilterWrapper(
+        dt=0.0000000005,
+        process_noise=1,
+        measurement_noise=10,
+        initial_estimate=np.array([0, 0]),
+        initial_covariance=np.eye(2)
+    )
     load_config()
     # with open('configs.txt', 'r', encoding="utf-8") as f:
     #     config_list = []

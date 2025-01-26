@@ -9,14 +9,14 @@
 5. window_y = 320
 
 # PID控制调节
-6. PID_time = 0.005
-7. Kp = 0.505
-8. Ki = 0.001
-9. Kd = 0.00005
+6. PID_time = 0.002
+7. Kp = 0.398
+8. Ki = 1.8
+9. Kd = 0.000005
 
-10. y_portion = 0.1
+10. y_portion = 0.4
 
-11. max_step = 30
+11. max_step = 2
 
 12. aim_mod = 0
 

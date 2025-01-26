@@ -103,7 +103,7 @@ class CH9350Mouse:
         """
         try:
             self.ser = serial.Serial(port, baudrate)
-            time.sleep(2)  # Wait for the serial connection to initialize
+            # time.sleep(2)  # Wait for the serial connection to initialize
             print(f"Connected to CH9350 on {port} with baudrate {baudrate}")
         except serial.SerialException as e:
             print(f"Error opening serial port: {e}")

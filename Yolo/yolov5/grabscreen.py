@@ -2,23 +2,29 @@ import cv2
 import numpy as np
 import win32gui, win32ui, win32con, win32api
 
+
 class ScreenGrabber:
     def __init__(self, use_capture_device=False, device_index=0):
         self.use_capture_device = use_capture_device
         self.device_index = device_index
-        # self.device_fps = device_fps
 
         if self.use_capture_device:
-            self.cap = cv2.VideoCapture(self.device_index)
+            self.cap = cv2.VideoCapture(self.device_index, cv2.CAP_DSHOW)
             if not self.cap.isOpened():
                 raise ValueError(f"Unable to open capture device {self.device_index}")
+            self.cap.set(cv2.CAP_PROP_FPS, 60)
+            actual_fps = self.cap.get(cv2.CAP_PROP_FPS)
+            print(actual_fps)
 
     def grab_screen(self, region=None):
         if self.use_capture_device:
             # 设备捕获（例如摄像头）
+            # 丢弃所有缓存的帧，只获取最新一帧
             ret, frame = self.cap.read()
             if not ret:
                 raise RuntimeError("Failed to grab frame from capture device")
+
+            # 只返回最新一帧
             height, width, _ = frame.shape
             crop_size = 320
             center_x, center_y = width // 2, height // 2

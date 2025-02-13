@@ -152,6 +152,32 @@ def select_mouse(mouse_type="Logitech", port="COM6", baudrate=115200):
         raise ValueError("Unsupported mouse type. Choose 'Logitech' or 'CH9350'.")
 
 
+def dynamic_speed(error, max_speed=50, min_speed=2, brake_zone=80, decay_factor=0.7):
+    """
+    :param error: 当前误差（目标位置-当前位置）
+    :param max_speed: 最大移动步长
+    :param min_speed: 最小移动步长
+    :param brake_zone: 制动起始距离（像素）
+    :param decay_factor: 阻尼衰减系数（0~1）
+    :return: 带阻尼的速度值
+    """
+    abs_error = abs(error)
+
+    # 死区处理
+    if abs_error < 3:
+        return 0
+
+    # 基础速度曲线
+    base_speed = max(min_speed, min(max_speed, abs_error * 0.5))
+
+    # 制动区阻尼计算
+    if abs_error < brake_zone:
+        # 指数衰减：离目标越近减速越快
+        damping = (abs_error / brake_zone) ** decay_factor
+        base_speed *= damping
+
+    return int(base_speed * (error / abs_error))
+
 
 # 启动线程来更新 PID 参数
 pid_update_thread = threading.Thread(target=update_pid_in_background, daemon=True)
@@ -162,7 +188,7 @@ def find_target(
         weights=ROOT / r'C:\Users\Administrator\PycharmProjects\cq\onnx\Valorant_fp16.engine',  # model.pt path(s)
         # weights=ROOT / r'C:\Users\Administrator\PycharmProjects\cq\Yolo\yolov5\wazi_fp16.engine',  # model.pt path(s)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        # imgsz=(256, 256),  # inference size (height, width)
+        # imgsz=(320, 320),  # inference size (height, width)
         imgsz=(416, 416),
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
@@ -301,11 +327,38 @@ def find_target(
                     final_x = int(filtered_x)
                     final_y = int(filtered_y)
 
-                    pid_x = int(pid.calculate(final_x, 0))
-                    pid_y = int(pid.calculate(final_y, 0))
+                    # pid_x = int(pid.calculate(final_x, 0))
+                    # pid_y = int(pid.calculate(final_y, 0))
+                    raw_x = pid.calculate(final_x, 0)
+                    raw_y = pid.calculate(final_y, 0)
 
+                    # 应用动态速度曲线
+                    pid_x = dynamic_speed(raw_x,
+                                          max_speed=configs_dict[11],  # 使用配置的max_step
+                                          min_speed=2,
+                                          brake_zone=90,
+                                          decay_factor=0.004)
+
+                    pid_y = dynamic_speed(raw_y,
+                                          max_speed=configs_dict[11],
+                                          min_speed=2,
+                                          brake_zone=60,
+                                          decay_factor=0.0)
+
+                    # 添加惯性衰减（模拟物理阻尼）
+                    last_move = {'x': 0, 'y': 0}  # 在循环外初始化
+
+                    # 惯性衰减计算
+                    pid_x = int(pid_x * 0.7 + last_move['x'] * 0.3)
+                    pid_y = int(pid_y * 0.7 + last_move['y'] * 0.3)
+                    last_move.update({'x': pid_x, 'y': pid_y})
+
+                    # 执行移动
+                    if pid_x != 0 or pid_y != 0:
+                        mouse_controller.move(pid_x, 0)
+                        print(f"AdjSpeed: X{pid_x} Y{pid_y} | Raw: X{raw_x:.1f} Y{raw_y:.1f}")
                     # Move the mouse
-                    mouse_controller.move(pid_x, 0)
+                    # mouse_controller.move(pid_x, 0)
                     # logitech_mouse.move(pid_x, pid_y)  # Call Logitech mouse move method
                     # print(f"Mouse-Move X Y = ({pid_x}, {pid_y})")
         # else:

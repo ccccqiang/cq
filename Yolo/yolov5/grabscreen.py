@@ -12,9 +12,12 @@ class ScreenGrabber:
             self.cap = cv2.VideoCapture(self.device_index, cv2.CAP_DSHOW)
             if not self.cap.isOpened():
                 raise ValueError(f"Unable to open capture device {self.device_index}")
-            self.cap.set(cv2.CAP_PROP_FPS, 60)
-            actual_fps = self.cap.get(cv2.CAP_PROP_FPS)
-            print(actual_fps)
+            self.cap.set(cv2.CAP_PROP_FPS, 144)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'YUY2'))
+            # bf_size = self.cap.get(cv2.CAP_PROP_BUFFERSIZE)
+            # actual_fps = self.cap.get(cv2.CAP_PROP_FPS)
+            # print(actual_fps,bf_size)
 
     def grab_screen(self, region=None):
         if self.use_capture_device:

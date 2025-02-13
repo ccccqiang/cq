@@ -16,7 +16,7 @@
 
 10. y_portion = 0.6
 
-11. max_step = 30
+11. max_step = 50
 
 12. aim_mod = 3
 
